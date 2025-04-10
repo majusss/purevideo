@@ -25,6 +25,7 @@ class FilmanDioFactory {
                 true) {
               throw FilmanAuthException("Przekierowano na stronę logowania");
             }
+
             return handler.next(response);
           },
         ),

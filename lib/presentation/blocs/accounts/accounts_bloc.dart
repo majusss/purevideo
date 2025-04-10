@@ -1,7 +1,11 @@
+import 'dart:convert';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
+import 'package:purevideo/data/services/secure_storage_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_event.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_state.dart';
@@ -60,6 +64,11 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
           cookies: result.account!.cookies,
           service: event.service,
         );
+        await SecureStorageService.saveServiceData(
+          event.service,
+          'account',
+          jsonEncode(account.toJson()),
+        );
         _accounts[event.service] = account;
         emit(AccountsLoaded(Map.from(_accounts)));
       } else {
@@ -77,6 +86,7 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     try {
       emit(const AccountsLoading());
       _accounts.remove(event.service);
+      await SecureStorageService.deleteServiceData(event.service, 'account');
       emit(AccountsLoaded(Map.from(_accounts)));
     } catch (e) {
       emit(AccountsError(e.toString()));
@@ -90,8 +100,17 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     try {
       emit(const AccountsLoading());
 
+      debugPrint("Loading accounts");
+
       for (final service in _repositories.keys) {
         final account = await getAccountForService(service);
+        final accountJson = await SecureStorageService.getServiceData(
+          service,
+          'account',
+        );
+        if (accountJson != null) {
+          _accounts[service] = AccountModel.fromJson(jsonDecode(accountJson));
+        }
         if (account != null) {
           _accounts[service] = account;
         }
