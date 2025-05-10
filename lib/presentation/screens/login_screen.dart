@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void _handleSubmit() {
     if (_captchaToken == null) {
-      return getIt<ReCaptchaBloc>().add(ReCaptchaShown());
+      return getIt<ReCaptchaBloc>().add(const ReCaptchaShown());
     }
     if (_formKey.currentState!.validate()) {
       context.read<AccountsBloc>().add(

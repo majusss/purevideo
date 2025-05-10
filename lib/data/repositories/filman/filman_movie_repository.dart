@@ -1,16 +1,24 @@
+import 'dart:convert';
+
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/models/link_model.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/models/auth_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_dio_factory.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
+import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:html/parser.dart' as html;
+import 'package:html/dom.dart' as dom;
 import 'package:purevideo/di/injection_container.dart';
 
 class FilmanMovieRepository implements MovieRepository {
   final AuthRepository _authRepository =
       getIt<Map<SupportedService, AuthRepository>>()[SupportedService.filman]!;
+  final VideoSourceRepository _videoSourceRepository =
+      getIt<VideoSourceRepository>();
   Dio? _dio;
 
   FilmanMovieRepository() {
@@ -23,14 +31,52 @@ class FilmanMovieRepository implements MovieRepository {
     }
   }
 
-  @override
-  Future<List<MovieModel>> getMovies() async {
+  Future<void> _prepareDio() async {
     if (_dio == null) {
       final account = _authRepository.getAccountForService(
         SupportedService.filman,
       );
       _dio = FilmanDioFactory.getDio(account);
     }
+  }
+
+  List<HostLink> _extractHostLinksFromDocument(dom.Document document) {
+    final videoUrls = <HostLink>[];
+
+    for (final row in document.querySelectorAll("tbody tr")) {
+      String? link;
+
+      try {
+        final decoded = base64Decode(
+            row.querySelector("td a")?.attributes["data-iframe"] ?? "");
+        link = (jsonDecode(utf8.decode(decoded))["src"] as String)
+            .split("/")
+            .take(7)
+            .join("/");
+      } catch (_) {
+        link = null;
+      }
+
+      if (link == null || link.isEmpty == true) continue;
+
+      final tableData = row.querySelectorAll("td");
+      if (tableData.length < 3) continue;
+      final language = tableData[1].text.trim();
+      final qualityVersion = tableData[2].text.trim();
+
+      videoUrls.add(HostLink(
+        language,
+        qualityVersion,
+        link,
+      ));
+    }
+
+    return videoUrls;
+  }
+
+  @override
+  Future<List<MovieModel>> getMovies() async {
+    await _prepareDio();
 
     final response = await _dio!.get('/');
     final document = html.parse(response.data);
@@ -40,8 +86,7 @@ class FilmanMovieRepository implements MovieRepository {
     for (final list in document.querySelectorAll("div[id=item-list]")) {
       for (final item in list.children) {
         final poster = item.querySelector(".poster");
-        final title =
-            poster
+        final title = poster
                 ?.querySelector("a")
                 ?.attributes["title"]
                 ?.trim()
@@ -49,8 +94,7 @@ class FilmanMovieRepository implements MovieRepository {
                 .first
                 .trim() ??
             "Brak danych";
-        final imageUrl =
-            poster?.querySelector("img")?.attributes["src"] ??
+        final imageUrl = poster?.querySelector("img")?.attributes["src"] ??
             "https://placehold.co/250x370/png?font=roboto&text=?";
         final link =
             poster?.querySelector("a")?.attributes["href"] ?? "Brak danych";
@@ -72,20 +116,29 @@ class FilmanMovieRepository implements MovieRepository {
     return movies;
   }
 
+  Future<List<HostLink>> _scrapeEpisodeVideoUrls(String episodeUrl) async {
+    await _prepareDio();
+
+    final response = await _dio!.get(episodeUrl);
+    final document = html.parse(response.data);
+
+    final hostLinks = _extractHostLinksFromDocument(document);
+
+    debugPrint(
+        "Znaleziono ${hostLinks.length} hostlinków dla odcinka: $episodeUrl");
+
+    return hostLinks;
+  }
+
   @override
   Future<MovieDetailsModel> getMovieDetails(String url) async {
-    if (_dio == null) {
-      final account = _authRepository.getAccountForService(
-        SupportedService.filman,
-      );
-      _dio = FilmanDioFactory.getDio(account);
-    }
+    await _prepareDio();
 
     final response = await _dio!.get(url);
     final document = html.parse(response.data);
 
-    final title =
-        document.querySelector('[itemprop="name"]')?.text.trim() ??
+    final title = document.querySelector('[itemprop="title"]')?.text.trim() ??
+        document.querySelector('h2')?.text.trim() ??
         'Brak tytułu';
     final description =
         document.querySelector('.description')?.text.trim() ?? '';
@@ -112,18 +165,16 @@ class FilmanMovieRepository implements MovieRepository {
             break;
           case 'Gatunek:':
           case 'Kategoria:':
-            genres =
-                ulElement
-                    .querySelectorAll('li a')
-                    .map((e) => e.text.trim())
-                    .toList();
+            genres = ulElement
+                .querySelectorAll('li a')
+                .map((e) => e.text.trim())
+                .toList();
             break;
           case 'Kraj:':
-            countries =
-                ulElement
-                    .querySelectorAll('li a')
-                    .map((e) => e.text.trim())
-                    .toList();
+            countries = ulElement
+                .querySelectorAll('li a')
+                .map((e) => e.text.trim())
+                .toList();
             break;
         }
       }
@@ -137,24 +188,29 @@ class FilmanMovieRepository implements MovieRepository {
       for (final seasonElement in episodeList.children) {
         final seasonName = seasonElement.children.first.text.trim();
         final episodes = <EpisodeModel>[];
+
         for (final episodeElement in seasonElement.children.last.children) {
-          final title = episodeElement.text.trim();
-          final url =
-              episodeElement.querySelector('a')?.attributes['href'] ?? '';
+          final episodeTitle = episodeElement.text.trim();
+          final episodeUrl =
+              episodeElement.querySelector('a')?.attributes['href'];
+
+          if (episodeUrl == null) {
+            debugPrint("Nie można pobrać odcinka $episodeTitle - brak URL");
+            continue;
+          }
 
           episodes.add(
-            EpisodeModel(
-              title: title,
-              url: url,
-              description: Future.value("TODO"),
-              links: Future.value([]),
-            ),
+            EpisodeModel(title: episodeTitle, url: episodeUrl, videoUrls: []),
           );
         }
-        seasons.add(SeasonModel(name: seasonName, episodes: episodes));
+
+        seasons.add(SeasonModel(
+            name: seasonName, episodes: episodes.toList().reversed.toList()));
       }
+
       return MovieDetailsModel(
         service: SupportedService.filman,
+        url: url,
         title: title,
         description: description,
         imageUrl: imageUrl,
@@ -162,11 +218,15 @@ class FilmanMovieRepository implements MovieRepository {
         genres: genres,
         countries: countries,
         isSeries: isSeries,
-        seasons: seasons.reversed.toList(),
+        seasons: seasons.toList().reversed.toList(),
       );
     }
-    return MovieDetailsModel(
+
+    final videoUrls = _extractHostLinksFromDocument(document);
+
+    final movieModel = MovieDetailsModel(
       service: SupportedService.filman,
+      url: url,
       title: title,
       description: description,
       imageUrl: imageUrl,
@@ -174,6 +234,17 @@ class FilmanMovieRepository implements MovieRepository {
       genres: genres,
       countries: countries,
       isSeries: isSeries,
+      videoUrls: videoUrls,
     );
+
+    final updatedMovieModel =
+        await _videoSourceRepository.scrapeVideoUrls(movieModel);
+    return updatedMovieModel;
+  }
+
+  @override
+  Future<EpisodeModel> getEpisodeHosts(EpisodeModel episode) async {
+    final videoUrls = await _scrapeEpisodeVideoUrls(episode.url);
+    return episode.copyWith(videoUrls: videoUrls);
   }
 }

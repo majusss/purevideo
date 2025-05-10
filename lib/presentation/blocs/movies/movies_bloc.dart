@@ -45,7 +45,6 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       emit(MoviesLoading());
       _movies.clear();
 
-      // Sprawdź czy jest zalogowany użytkownik dla któregokolwiek serwisu
       bool hasLoggedInUser = false;
       for (final entry in _authRepositories.entries) {
         final account = entry.value.getAccountForService(entry.key);
@@ -60,7 +59,6 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
         return;
       }
 
-      // Ładuj filmy tylko z serwisów, gdzie użytkownik jest zalogowany
       for (final entry in _repositories.entries) {
         final service = entry.key;
         final repository = entry.value;

@@ -12,13 +12,14 @@ class StreamtapeScraper extends VideoHostScraper {
 
   @override
   List<String> get domains => [
-    'streamtape.com',
-    'streamtape.net',
-    'streamtape.xyz',
-  ];
+        'streamtape.com',
+        'streamtape.net',
+        'streamtape.xyz',
+      ];
 
   @override
-  Future<VideoSource?> getVideoSource(String url) async {
+  Future<VideoSource?> getVideoSource(
+      String url, String lang, String quality) async {
     try {
       final response = await _dio.get(url);
       final jsLineMatch = RegExp(
@@ -30,11 +31,10 @@ class StreamtapeScraper extends VideoHostScraper {
       }
 
       final String jsLine = jsLineMatch.group(0)!;
-      final List<String> urls =
-          RegExp(r"'([^']*)'")
-              .allMatches(jsLine)
-              .map((m) => m.group(0)!.replaceAll("'", ""))
-              .toList();
+      final List<String> urls = RegExp(r"'([^']*)'")
+          .allMatches(jsLine)
+          .map((m) => m.group(0)!.replaceAll("'", ""))
+          .toList();
 
       if (urls.length != 2) {
         return null;
@@ -48,8 +48,8 @@ class StreamtapeScraper extends VideoHostScraper {
         fullUrl,
         options: Options(
           followRedirects: false,
-          validateStatus:
-              (status) => status != null && status >= 200 && status < 400,
+          validateStatus: (status) =>
+              status != null && status >= 200 && status < 400,
         ),
       );
 
@@ -60,7 +60,8 @@ class StreamtapeScraper extends VideoHostScraper {
 
       return VideoSource(
         url: Uri.parse(directLink).toString(),
-        quality: VideoQuality.p720,
+        lang: lang,
+        quality: quality,
         headers: {
           'Referer': url,
           'User-Agent':

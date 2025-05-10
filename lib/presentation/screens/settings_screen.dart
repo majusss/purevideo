@@ -1,8 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:hive_flutter/adapters.dart';
+import 'package:purevideo/core/services/settings_service.dart';
+import 'package:purevideo/di/injection_container.dart';
 
-class SettingsScreen extends StatelessWidget {
+class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
+
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final SettingsService _settingsService = getIt();
 
   @override
   Widget build(BuildContext context) {
@@ -47,11 +57,62 @@ class SettingsScreen extends StatelessWidget {
                 title: 'O aplikacji',
                 subtitle: 'Informacje o wersji',
                 onTap: () {
-                  // TODO: Implement about screen
+                  context.pushNamed('about');
                 },
               ),
             ],
           ),
+          ValueListenableBuilder(
+            valueListenable: Hive.box('settings').listenable(),
+            builder: (context, value, child) {
+              if (_settingsService.isDeveloperMode == false) {
+                return const SizedBox.shrink();
+              }
+              return Column(
+                children: [
+                  const SizedBox(height: 24),
+                  _SettingsSection(
+                    title: 'Opcje deweloperskie',
+                    items: [
+                      _SettingsItem(
+                        icon: Icons.bug_report_outlined,
+                        title: 'Debugowanie',
+                        subtitle: 'Pokaż debugowanie filmów i seriali',
+                        onTap: () {
+                          setState(() {
+                            _settingsService.setDebugVisible(
+                                !_settingsService.isDebugVisible);
+                          });
+                        },
+                        trailing: Switch(
+                          value: _settingsService.isDebugVisible,
+                          onChanged: (value) {
+                            setState(() {
+                              _settingsService.setDebugVisible(value);
+                            });
+                          },
+                        ),
+                      ),
+                      _SettingsItem(
+                        icon: Icons.developer_mode,
+                        title: 'Tryb deweloperski',
+                        subtitle: 'Wyłącz tryb deweloperski',
+                        onTap: () {
+                          setState(() {
+                            _settingsService.setDeveloperMode(false);
+                          });
+                        },
+                        trailing: Icon(
+                          Icons.close,
+                          color: Theme.of(context).colorScheme.error,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          )
         ],
       ),
     );
@@ -74,8 +135,8 @@ class _SettingsSection extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
-            ),
+                  color: Theme.of(context).colorScheme.onSurface.withAlpha(153),
+                ),
           ),
         ),
         Container(
@@ -102,12 +163,14 @@ class _SettingsItem extends StatelessWidget {
   final String title;
   final String subtitle;
   final VoidCallback onTap;
+  final Widget? trailing;
 
   const _SettingsItem({
     required this.icon,
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.trailing,
   });
 
   @override
@@ -131,14 +194,18 @@ class _SettingsItem extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(153),
-                      ),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withAlpha(153),
+                          ),
                     ),
                   ],
                 ),
               ),
+              if (trailing != null) ...[
+                const SizedBox(width: 16),
+                trailing!,
+              ],
               Icon(
                 Icons.chevron_right,
                 color: Theme.of(context).colorScheme.onSurface.withAlpha(153),

@@ -76,7 +76,7 @@ class AccountsScreen extends StatelessWidget {
                       message: state.message,
                       onRetry: () {
                         context.read<AccountsBloc>().add(
-                          LoadAccountsRequested(),
+                          const LoadAccountsRequested(),
                         );
                       },
                     );

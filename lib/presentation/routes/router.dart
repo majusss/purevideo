@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purevideo/presentation/screens/about_screen.dart';
 import 'package:purevideo/presentation/screens/main_screen.dart';
 import 'package:purevideo/presentation/screens/home_screen.dart';
 import 'package:purevideo/presentation/screens/search_screen.dart';
@@ -9,10 +9,9 @@ import 'package:purevideo/presentation/screens/settings_screen.dart';
 import 'package:purevideo/presentation/screens/accounts_screen.dart';
 import 'package:purevideo/presentation/screens/login_screen.dart';
 import 'package:purevideo/presentation/screens/movie_details_screen.dart';
+import 'package:purevideo/presentation/screens/player_screen.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
-import 'package:purevideo/data/repositories/movie_repository.dart';
-import 'package:purevideo/di/injection_container.dart';
-import 'package:purevideo/presentation/widgets/error_view.dart';
+import 'package:purevideo/data/models/movie_model.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -40,43 +39,47 @@ final router = GoRouter(
       },
     ),
     GoRoute(
+      path: '/settings/about',
+      name: 'about',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage(child: AboutScreen());
+      },
+    ),
+    GoRoute(
       path: '/movie/:service/:url',
       name: 'movie_details',
       pageBuilder: (context, state) {
         final service = SupportedService.values.firstWhere(
           (e) => e.name == state.pathParameters['service'],
+          orElse: () => SupportedService.values.first,
         );
-        final url = state.pathParameters['url']!;
-        final repository =
-            getIt<Map<SupportedService, MovieRepository>>()[service]!;
+        final url = state.pathParameters['url'] ?? '';
 
         return NoTransitionPage(
-          child: FutureBuilder(
-            future: repository.getMovieDetails(url),
-            builder: (context, snapshot) {
-              if (snapshot.hasData) {
-                return MovieDetailsScreen(movie: snapshot.data!);
-              }
-              if (snapshot.hasError) {
-                return Scaffold(
-                  appBar: AppBar(
-                    leading: BackButton(onPressed: () => context.pop()),
-                  ),
-                  body: ErrorView(
-                    message: 'Wystąpił błąd: ${snapshot.error}',
-                    onRetry: () {
-                      context.goNamed(
-                        'movie_details',
-                        pathParameters: {'service': service.name, 'url': url},
-                      );
-                    },
-                  ),
-                );
-              }
-              return const Scaffold(
-                body: Center(child: CircularProgressIndicator()),
-              );
-            },
+          child: MovieDetailsScreen(
+            service: service,
+            url: url,
+          ),
+        );
+      },
+    ),
+    GoRoute(
+      path: '/player',
+      name: 'player',
+      pageBuilder: (context, state) {
+        final MovieDetailsModel movie = state.extra as MovieDetailsModel;
+        final int? seasonIndex = (state.uri.queryParameters['season'] != null)
+            ? int.tryParse(state.uri.queryParameters['season']!)
+            : null;
+        final int? episodeIndex = (state.uri.queryParameters['episode'] != null)
+            ? int.tryParse(state.uri.queryParameters['episode']!)
+            : null;
+
+        return NoTransitionPage(
+          child: PlayerScreen(
+            movie: movie,
+            seasonIndex: seasonIndex,
+            episodeIndex: episodeIndex,
           ),
         );
       },

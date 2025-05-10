@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
-import 'package:purevideo/data/services/secure_storage_service.dart';
+import 'package:purevideo/core/services/secure_storage_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_event.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_state.dart';

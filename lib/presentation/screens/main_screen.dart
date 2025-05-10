@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 class MainScreen extends StatefulWidget {
@@ -18,12 +19,13 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: _CustomBottomNavigationBar(
         currentIndex: widget.navigationShell.currentIndex,
         onTap: (index) {
-          // Jeśli kliknięto ten sam indeks, nie robimy nic
           if (index == widget.navigationShell.currentIndex) return;
+
+          HapticFeedback.mediumImpact();
 
           widget.navigationShell.goBranch(
             index,
-            initialLocation: index == widget.navigationShell.currentIndex,
+            initialLocation: false,
           );
         },
       ),
@@ -111,36 +113,41 @@ class _NavBarItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: SizedBox(
-        width: 64,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              isSelected ? activeIcon : icon,
-              color:
-                  isSelected
+    return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          customBorder: const CircleBorder(),
+          splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+          highlightColor:
+              Theme.of(context).colorScheme.primary.withOpacity(0.2),
+          child: SizedBox(
+            width: 64,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isSelected ? activeIcon : icon,
+                  color: isSelected
                       ? Theme.of(context).colorScheme.primary
                       : Theme.of(context).colorScheme.onSurface.withAlpha(153),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 12,
-                color:
-                    isSelected
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: isSelected
                         ? Theme.of(context).colorScheme.primary
-                        : Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withAlpha(153),
-              ),
+                        : Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withAlpha(153),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
+          ),
+        ));
   }
 }

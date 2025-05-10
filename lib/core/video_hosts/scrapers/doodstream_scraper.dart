@@ -1,37 +1,91 @@
+import 'dart:math';
 import 'package:dio/dio.dart';
-import 'package:html/parser.dart' as html_parser;
-import '../video_scraper.dart';
+import 'package:flutter/material.dart';
+import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
-class DoodstreamScraper implements VideoScraper {
-  final Dio _dio = Dio();
-  final RegExp _tokenRegex = RegExp(r'/pass_md5/([a-zA-Z0-9]+)');
+class DoodStreamScraper extends VideoHostScraper {
+  final Dio _dio;
+
+  DoodStreamScraper(this._dio);
 
   @override
-  Future<String?> getVideoSource(String url) async {
-    try {
-      final response = await _dio.get(url);
-      final document = html_parser.parse(response.data);
-      final scripts = document.getElementsByTagName('script');
+  String get name => 'DoodStream';
 
-      String? token;
-      for (final script in scripts) {
-        final match = _tokenRegex.firstMatch(script.text);
-        if (match != null) {
-          token = match.group(1);
-          break;
-        }
+  @override
+  List<String> get domains => [
+        'd0000d.com',
+        'd000d.com',
+        'doodstream.com',
+        'dooood.com',
+        'dood.wf',
+        'dood.cx',
+        'dood.sh',
+        'dood.watch',
+        'dood.pm',
+        'dood.to',
+        'dood.so',
+        'dood.ws',
+        'dood.yt',
+        'dood.li',
+        'ds2play.com',
+        'ds2video.com'
+      ];
+
+  @override
+  Future<VideoSource?> getVideoSource(
+      String url, String lang, String quality) async {
+    try {
+      final embedUrl = url.replaceAll("/d/", "/e/");
+      final response = await _dio.get(embedUrl);
+
+      final host = _getBaseUrl(response.redirects.last.location.toString());
+      final responseText = response.data;
+
+      final md5Match = RegExp(r"/pass_md5/[^']*").firstMatch(responseText);
+      if (md5Match == null) {
+        return null;
       }
 
-      if (token == null) return null;
-
-      final videoResponse = await _dio.get(
-        'https://dood.yt/pass_md5/$token',
-        options: Options(headers: {'Referer': url}),
+      final md5 = host + md5Match.group(0)!;
+      final trueResponse = await _dio.get(
+        md5,
+        options: Options(
+          headers: {
+            "Referer": host,
+          },
+          validateStatus: (_) => true,
+        ),
       );
 
-      return videoResponse.data;
+      final trueUrl =
+          '${trueResponse.data}${_createHashTable()}?token=${md5.split("/").last}';
+
+      return VideoSource(
+        url: Uri.parse(trueUrl).toString(),
+        lang: lang,
+        quality: quality,
+        headers: {
+          'Referer': url,
+          'User-Agent':
+              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+        },
+      );
     } catch (e) {
+      debugPrint('Błąd podczas pobierania źródła z DoodStream($url): $e');
       return null;
     }
+  }
+
+  String _getBaseUrl(final String url) {
+    final uri = Uri.parse(url);
+    return "${uri.scheme}://${uri.host}";
+  }
+
+  String _createHashTable() {
+    const alphabet =
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    final random = Random();
+    return List.generate(10, (_) => alphabet[random.nextInt(alphabet.length)])
+        .join();
   }
 }

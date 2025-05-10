@@ -7,7 +7,7 @@ import 'package:purevideo/data/models/account_model.dart';
 import 'package:purevideo/data/models/auth_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_dio_factory.dart';
-import 'package:purevideo/data/services/secure_storage_service.dart';
+import 'package:purevideo/core/services/secure_storage_service.dart';
 import 'package:html/parser.dart' as html;
 
 class FilmanAuthRepository implements AuthRepository {

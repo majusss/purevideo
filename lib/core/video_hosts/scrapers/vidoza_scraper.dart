@@ -15,7 +15,8 @@ class VidozaScraper extends VideoHostScraper {
   List<String> get domains => ['vidoza.net'];
 
   @override
-  Future<VideoSource?> getVideoSource(String url) async {
+  Future<VideoSource?> getVideoSource(
+      String url, String lang, String quality) async {
     try {
       final response = await _dio.get(url);
       final document = html.parse(response.data);
@@ -31,7 +32,8 @@ class VidozaScraper extends VideoHostScraper {
 
       return VideoSource(
         url: Uri.parse(directLink).toString(),
-        quality: VideoQuality.p720,
+        lang: lang,
+        quality: quality,
         headers: {
           'Referer': url,
           'User-Agent':

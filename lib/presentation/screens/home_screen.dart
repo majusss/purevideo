@@ -24,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('PureVideo'), scrolledUnderElevation: 0),
       body: BlocBuilder<MoviesBloc, MoviesState>(
         builder: (context, state) {
           if (state is MoviesLoading) {
@@ -49,19 +48,24 @@ class _HomeScreenState extends State<HomeScreen> {
               moviesByCategory.putIfAbsent(category, () => []).add(movie);
             }
 
-            return ListView(
-              padding: EdgeInsets.only(
-                top: 8,
-                bottom: MediaQuery.of(context).padding.bottom + 16,
+            return RefreshIndicator(
+              onRefresh:
+                  () async =>
+                      context.read<MoviesBloc>().add(LoadMoviesRequested()),
+              child: ListView(
+                padding: EdgeInsets.only(
+                  top: 8,
+                  bottom: MediaQuery.of(context).padding.bottom + 16,
+                ),
+                children:
+                    moviesByCategory.entries
+                        .where((entry) => entry.value.isNotEmpty)
+                        .map(
+                          (entry) =>
+                              MovieRow(title: entry.key, movies: entry.value),
+                        )
+                        .toList(),
               ),
-              children:
-                  moviesByCategory.entries
-                      .where((entry) => entry.value.isNotEmpty)
-                      .map(
-                        (entry) =>
-                            MovieRow(title: entry.key, movies: entry.value),
-                      )
-                      .toList(),
             );
           }
           return const SizedBox.shrink();

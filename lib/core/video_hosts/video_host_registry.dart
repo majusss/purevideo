@@ -1,32 +1,30 @@
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
 class VideoHostRegistry {
-  final Map<String, VideoHostScraper> _scrapers = {};
-
-  static final VideoHostRegistry instance = VideoHostRegistry._();
-
-  VideoHostRegistry._();
+  final List<VideoHostScraper> _scrapers = [];
 
   void registerScraper(VideoHostScraper scraper) {
-    _scrapers[scraper.name] = scraper;
+    _scrapers.add(scraper);
   }
 
   VideoHostScraper? getScraperForUrl(String url) {
-    return _scrapers.values.firstWhere(
-      (scraper) => scraper.canHandle(url),
-      orElse: () => throw UnsupportedHostException(url),
-    );
+    try {
+      return _scrapers.firstWhere(
+        (scraper) => scraper.canHandle(url),
+        orElse: () => throw Exception('Brak obsługi dla URL: $url'),
+      );
+    } catch (e) {
+      return null;
+    }
   }
 
-  List<VideoHostScraper> get scrapers => _scrapers.values.toList();
-}
+  bool isHostSupported(String url) {
+    try {
+      return _scrapers.any((scraper) => scraper.canHandle(url));
+    } catch (e) {
+      return false;
+    }
+  }
 
-class UnsupportedHostException implements Exception {
-  final String url;
-
-  UnsupportedHostException(this.url);
-
-  @override
-  String toString() =>
-      'Nieobsługiwany host wideo: ${Uri.tryParse(url)?.host ?? url}';
+  List<VideoHostScraper> get scrapers => List.unmodifiable(_scrapers);
 }

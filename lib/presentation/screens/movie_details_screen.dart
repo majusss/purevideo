@@ -1,47 +1,113 @@
 import 'package:flutter/material.dart';
-import 'package:purevideo/data/models/movie_model.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/di/injection_container.dart';
+import 'package:purevideo/presentation/blocs/movie_details/movie_details_bloc.dart';
+import 'package:purevideo/presentation/blocs/movie_details/movie_details_event.dart';
+import 'package:purevideo/presentation/blocs/movie_details/movie_details_state.dart';
+import 'package:purevideo/presentation/widgets/error_view.dart';
+import 'package:purevideo/core/services/settings_service.dart';
 
-class MovieDetailsScreen extends StatefulWidget {
-  final MovieDetailsModel movie;
+class MovieDetailsScreen extends StatelessWidget {
+  final SupportedService service;
+  final String url;
 
-  const MovieDetailsScreen({super.key, required this.movie});
-
-  @override
-  State<MovieDetailsScreen> createState() => _MovieDetailsScreenState();
-}
-
-class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
-  int _selectedSeasonIndex = 0;
+  const MovieDetailsScreen({
+    super.key,
+    required this.service,
+    required this.url,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final movie = widget.movie;
-    final seasons = movie.seasons ?? [];
-    final currentSeason =
-        seasons.isNotEmpty ? seasons[_selectedSeasonIndex] : null;
-    final episodes = currentSeason?.episodes ?? [];
+    return BlocProvider(
+      create: (context) => getIt<MovieDetailsBloc>()
+        ..add(
+          LoadMovieDetails(service: service, url: url),
+        ),
+      child: const MovieDetailsView(),
+    );
+  }
+}
+
+class MovieDetailsView extends StatelessWidget {
+  const MovieDetailsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<MovieDetailsBloc, MovieDetailsState>(
+      builder: (context, state) {
+        if (state.movie != null) {
+          return _buildMovieDetails(context, state);
+        } else if (state.errorMessage != null) {
+          return _buildErrorView(
+              context, state.errorMessage ?? 'Nieznany błąd');
+        } else {
+          return _buildLoadingView(context);
+        }
+      },
+    );
+  }
+
+  Widget _buildLoadingView(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            FilledButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              icon: const Icon(Icons.arrow_back),
+              label: const Text("Anuluj"),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorView(BuildContext context, String errorMessage) {
+    return Scaffold(
+      appBar: AppBar(
+        leading: BackButton(onPressed: () => Navigator.of(context).pop()),
+      ),
+      body: ErrorView(
+        message: 'Wystąpił błąd: $errorMessage',
+        onRetry: () {
+          final bloc = context.read<MovieDetailsBloc>();
+          final service = ModalRoute.of(context)?.settings.arguments
+              as Map<String, dynamic>?;
+          if (service != null &&
+              service['service'] != null &&
+              service['url'] != null) {
+            bloc.add(LoadMovieDetails(
+              service: service['service'],
+              url: service['url'],
+            ));
+          }
+        },
+      ),
+    );
+  }
+
+  Widget _buildMovieDetails(BuildContext context, MovieDetailsState state) {
+    final movie = state.movie!;
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
 
     return Scaffold(
+      appBar: AppBar(),
       body: CustomScrollView(
         slivers: [
           SliverToBoxAdapter(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top + 8,
-                    left: 4,
-                    right: 16,
-                    bottom: 16,
-                  ),
-                  child: IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.arrow_back),
-                  ),
-                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   child: Column(
@@ -51,30 +117,26 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         Wrap(
                           spacing: 8.0,
                           runSpacing: 8.0,
-                          children:
-                              movie.genres
-                                  .map(
-                                    (genre) => Chip(
-                                      label: Text(genre),
-                                      backgroundColor:
-                                          colorScheme.secondaryContainer,
-                                      labelStyle: textTheme.bodyMedium
-                                          ?.copyWith(
-                                            color:
-                                                colorScheme
-                                                    .onSecondaryContainer,
-                                          ),
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 8,
-                                      ),
-                                      visualDensity: VisualDensity.compact,
-                                    ),
-                                  )
-                                  .toList(),
+                          children: movie.genres
+                              .map(
+                                (genre) => Chip(
+                                  label: Text(genre),
+                                  backgroundColor:
+                                      colorScheme.secondaryContainer,
+                                  labelStyle: textTheme.bodyMedium?.copyWith(
+                                    color: colorScheme.onSecondaryContainer,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                  ),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              )
+                              .toList(),
                         ),
                       const SizedBox(height: 16),
                       Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           SizedBox(
                             width: 140,
@@ -85,15 +147,15 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                                 child: Image.network(
                                   movie.imageUrl,
                                   fit: BoxFit.cover,
-                                  errorBuilder:
-                                      (context, error, stackTrace) => Container(
-                                        color: Colors.grey[800],
-                                        child: const Icon(
-                                          Icons.broken_image,
-                                          size: 50,
-                                          color: Colors.grey,
-                                        ),
-                                      ),
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      Container(
+                                    color: Colors.grey[800],
+                                    child: const Icon(
+                                      Icons.broken_image,
+                                      size: 50,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ),
@@ -127,22 +189,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      FilledButton.icon(
-                        onPressed: () {
-                          // TODO: Odtwórz film
-                        },
-                        icon: const Icon(Icons.play_arrow),
-                        label: Text(
-                          movie.isSeries
-                              ? 'Oglądaj pierwszy odcinek'
-                              : 'Oglądaj film',
-                        ),
-                        style: FilledButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
-                          minimumSize: const Size(double.infinity, 0),
-                          textStyle: textTheme.titleMedium,
-                        ),
-                      ),
+                      _buildPlayButton(context, state),
+                      if (!state.isSeries &&
+                          getIt<SettingsService>().isDebugVisible)
+                        _buildMovieDebugPanel(context, state),
                     ],
                   ),
                 ),
@@ -156,18 +206,51 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 Text('Opis', style: textTheme.titleLarge),
                 const SizedBox(height: 8),
                 Text(
-                  movie.description.isEmpty ? 'Brak opisu.' : movie.description,
+                  movie.description,
                   style: textTheme.bodyLarge?.copyWith(
                     color: colorScheme.onSurfaceVariant,
                   ),
                 ),
                 const SizedBox(height: 24),
-                if (movie.isSeries && seasons.isNotEmpty)
-                  _buildSeriesSection(context, seasons, episodes),
+                if (state.isSeries && state.seasons.isNotEmpty)
+                  _buildSeriesSection(context, state),
               ]),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPlayButton(BuildContext context, MovieDetailsState state) {
+    final textTheme = Theme.of(context).textTheme;
+    final movie = state.movie!;
+
+    return FilledButton.icon(
+      onPressed: () {
+        if (movie.isSeries) {
+          context.pushNamed(
+            'player',
+            extra: movie,
+            queryParameters: {
+              'season': state.selectedSeasonIndex.toString(),
+              'episode': "0",
+            },
+          );
+        } else {
+          context.pushNamed(
+            'player',
+            extra: movie,
+          );
+        }
+      },
+      icon: const Icon(Icons.play_arrow),
+      label: Text(
+          "Oglądaj ${movie.isSeries ? 'sezon ${state.selectedSeasonIndex + 1}' : ''}"),
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        minimumSize: const Size(double.infinity, 0),
+        textStyle: textTheme.titleMedium,
       ),
     );
   }
@@ -187,13 +270,10 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
     );
   }
 
-  Widget _buildSeriesSection(
-    BuildContext context,
-    List<SeasonModel> seasons,
-    List<EpisodeModel> episodes,
-  ) {
+  Widget _buildSeriesSection(BuildContext context, MovieDetailsState state) {
     final textTheme = Theme.of(context).textTheme;
     final colorScheme = Theme.of(context).colorScheme;
+    final bloc = context.read<MovieDetailsBloc>();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -203,7 +283,7 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text('Odcinki', style: textTheme.titleLarge),
-            if (seasons.length > 1)
+            if (state.seasons.length > 1)
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 12,
@@ -215,20 +295,17 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 ),
                 child: DropdownButtonHideUnderline(
                   child: DropdownButton<int>(
-                    value: _selectedSeasonIndex,
+                    value: state.selectedSeasonIndex,
                     isDense: true,
-                    items:
-                        seasons.asMap().entries.map((entry) {
-                          return DropdownMenuItem<int>(
-                            value: entry.key,
-                            child: Text(entry.value.name),
-                          );
-                        }).toList(),
+                    items: state.seasons.asMap().entries.map((entry) {
+                      return DropdownMenuItem<int>(
+                        value: entry.key,
+                        child: Text(entry.value.name),
+                      );
+                    }).toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() {
-                          _selectedSeasonIndex = value;
-                        });
+                        bloc.add(SelectSeason(seasonIndex: value));
                       }
                     },
                     style: textTheme.bodyLarge,
@@ -236,25 +313,113 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                   ),
                 ),
               )
-            else if (seasons.isNotEmpty)
+            else if (state.seasons.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
-                child: Text(seasons.first.name, style: textTheme.titleMedium),
+                child: Text(state.seasons.first.name,
+                    style: textTheme.titleMedium),
               ),
           ],
         ),
-        const SizedBox(height: 12),
+
+        // Dodajemy panel debugowania statusu odcinków
+        if (getIt<SettingsService>().isDebugVisible)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Container(
+              padding: const EdgeInsets.all(8.0),
+              decoration: BoxDecoration(
+                color: colorScheme.surfaceContainerHighest,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Debug - Status odcinków:",
+                    style: textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      const Icon(Icons.play_circle_filled,
+                          size: 16, color: Colors.green),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Wczytane",
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Icon(Icons.hourglass_top,
+                          size: 16, color: Colors.orange),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Wczytywanie",
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      const Icon(Icons.play_circle_outline,
+                          size: 16, color: Colors.grey),
+                      const SizedBox(width: 4),
+                      Text(
+                        "Niewczytane",
+                        style: textTheme.bodySmall?.copyWith(
+                          color: colorScheme.onSurfaceVariant,
+                        ),
+                      ),
+                    ],
+                  ),
+                  Divider(
+                      height: 16,
+                      color: colorScheme.outline..withValues(alpha: 0.5)),
+                  Text(
+                    "Statystyki:",
+                    style: textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    "Całkowita liczba odcinków: ${state.episodes.length}",
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                  Text(
+                    "Odcinki wczytane: ${state.episodes.where((e) => e.directUrls != null && e.directUrls!.isNotEmpty).length}",
+                    style: textTheme.bodySmall?.copyWith(
+                      color: Colors.green,
+                    ),
+                  ),
+                  Text(
+                    "Odcinki z URLami wideo: ${state.episodes.length}",
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: episodes.length,
-          separatorBuilder:
-              (_, __) => Divider(
-                height: 1,
-                color: colorScheme.outlineVariant.withAlpha(128), // 0.5 opacity
-              ),
+          itemCount: state.episodes.length,
+          padding: const EdgeInsets.only(top: 8),
+          separatorBuilder: (_, __) => Divider(
+            height: 1,
+            color: colorScheme.outlineVariant.withAlpha(128),
+          ),
           itemBuilder: (context, index) {
-            final episode = episodes[index];
+            final episode = state.episodes[index];
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
                 vertical: 4,
@@ -264,23 +429,171 @@ class _MovieDetailsScreenState extends State<MovieDetailsScreen> {
                 backgroundColor: colorScheme.secondaryContainer,
                 child: Text(
                   '${index + 1}',
-                  style: textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSecondaryContainer,
-                  ),
+                  style: textTheme.bodyMedium
+                      ?.copyWith(color: colorScheme.onSecondaryContainer),
                 ),
               ),
-              title: Text(episode.title, style: textTheme.bodyLarge),
-              trailing: Icon(
-                Icons.play_circle_outline,
-                color: colorScheme.primary,
+              title: Text(
+                episode.title,
+                style: textTheme.bodyLarge,
               ),
               onTap: () {
-                // TODO: Implementacja odtwarzania odcinka
+                context.pushNamed(
+                  'player',
+                  extra: state.movie!,
+                  queryParameters: {
+                    'season': state.selectedSeasonIndex.toString(),
+                    'episode': index.toString(),
+                  },
+                );
               },
             );
           },
         ),
       ],
+    );
+  }
+
+  Widget _buildMovieDebugPanel(BuildContext context, MovieDetailsState state) {
+    final textTheme = Theme.of(context).textTheme;
+    final colorScheme = Theme.of(context).colorScheme;
+    final movie = state.movie!;
+    final hasDirectUrls =
+        movie.directUrls != null && movie.directUrls!.isNotEmpty;
+    final bloc = context.read<MovieDetailsBloc>();
+
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Container(
+        padding: const EdgeInsets.all(8.0),
+        decoration: BoxDecoration(
+          color: colorScheme.surfaceContainerHighest,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              "Debug - Status filmu:",
+              style: textTheme.bodyMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              children: [
+                Icon(
+                  hasDirectUrls
+                      ? Icons.play_circle_filled
+                      : Icons.play_circle_outline,
+                  size: 16,
+                  color: hasDirectUrls ? Colors.green : Colors.grey,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  hasDirectUrls ? "Źródła wczytane" : "Brak źródeł",
+                  style: textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+            Divider(
+                height: 16, color: colorScheme.outline.withValues(alpha: 0.5)),
+            Text(
+              "Statystyki:",
+              style: textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              "Host URLs: ${movie.videoUrls?.length ?? 0}",
+              style: textTheme.bodySmall?.copyWith(
+                color: colorScheme.onSurfaceVariant,
+              ),
+            ),
+            Text(
+              "Direct URLs: ${movie.directUrls?.length ?? 0}",
+              style: textTheme.bodySmall?.copyWith(
+                color: hasDirectUrls ? Colors.green : Colors.grey,
+              ),
+            ),
+            const SizedBox(height: 8),
+            FilledButton.icon(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text("Debug filmu"),
+                    content: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("Tytuł: ${movie.title}"),
+                          Text("URL: ${movie.url}"),
+                          const Divider(),
+                          Text(
+                            "Host URLs: ${movie.videoUrls?.length ?? 0}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          ...(movie.videoUrls ?? [])
+                              .map((link) => Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                        "${link.url} (${link.lang}, ${link.quality})"),
+                                  ))
+                              .toList(),
+                          const Divider(),
+                          Text(
+                            "Direct URLs: ${movie.directUrls?.length ?? 0}",
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          ...(movie.directUrls ?? [])
+                              .map((src) => Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                        "${src.url} (${src.lang}, ${src.quality})"),
+                                  ))
+                              .toList(),
+                        ],
+                      ),
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Zamknij"),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          bloc.add(ScrapeVideoUrls(
+                            movie: movie,
+                            service: movie.service,
+                          ));
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("Scrapuj ponownie"),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              icon: const Icon(Icons.bug_report, size: 16),
+              label: const Text("Szczegóły debugowania"),
+              style: FilledButton.styleFrom(
+                visualDensity: VisualDensity.compact,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                textStyle: textTheme.bodySmall,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -24,7 +24,7 @@ class PureVideoApp extends StatelessWidget {
           providers: [
             BlocProvider(
               create:
-                  (_) => getIt<AccountsBloc>()..add(LoadAccountsRequested()),
+                  (_) => getIt<AccountsBloc>()..add(const LoadAccountsRequested()),
             ),
             BlocProvider(
               create: (_) => getIt<MoviesBloc>()..add(LoadMoviesRequested()),
