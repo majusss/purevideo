@@ -14,9 +14,9 @@ class AboutScreen extends StatefulWidget {
 class _AboutScreenState extends State<AboutScreen> {
   PackageInfo _packageInfo = PackageInfo(
     appName: 'PureVideo',
-    packageName: 'com.example.purevideo',
-    version: '1.0.0',
-    buildNumber: '1',
+    packageName: 'io.github.majusss.purevideo',
+    version: '0.0.0',
+    buildNumber: '0',
   );
   int _versionClickCount = 0;
   final int _requiredClicks = 7;

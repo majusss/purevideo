@@ -9,6 +9,7 @@ import 'package:purevideo/core/services/secure_storage_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_event.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_state.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
   final Map<SupportedService, AuthRepository> _repositories = getIt();
@@ -58,6 +59,9 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
       );
 
       if (result.success && result.account != null) {
+        FirebaseAnalytics.instance.logLogin(
+          loginMethod: event.service.name,
+        );
         final account = AccountModel(
           login: result.account!.login,
           password: result.account!.password,

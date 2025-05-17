@@ -1,3 +1,5 @@
+[![Codemagic build status](https://api.codemagic.io/apps/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/status_badge.svg)](https://codemagic.io/app/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/latest_build)
+
 # Opis Projektu: PureVideo - Aplikacja Streamingowa we Flutterze
 
 PureVideo to wieloplatformowa aplikacja mobilna do streamingu filmów i seriali, zbudowana przy użyciu frameworka Flutter. Projekt zakłada pozyskiwanie treści z różnych źródeł internetowych poprzez mechanizmy scrapowania, co pozwala na agregację bogatej biblioteki mediów z rozproszonych zasobów.
