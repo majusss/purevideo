@@ -6,6 +6,7 @@ import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/blocs/movie_details/movie_details_event.dart';
 import 'package:purevideo/presentation/blocs/movie_details/movie_details_state.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 
 class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   final Map<SupportedService, MovieRepository> _movieRepositories = getIt();
@@ -34,6 +35,9 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
       }
 
       final movie = await movieRepository.getMovieDetails(event.url);
+
+      FirebaseAnalytics.instance
+          .logSelectContent(contentType: 'video', itemId: movie.url);
 
       emit(state.copyWith(
         movie: movie,

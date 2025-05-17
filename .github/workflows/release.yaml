@@ -1,0 +1,218 @@
+name: Flutter CI/CD Pipeline
+
+on:
+  push:
+    branches: [master, develop, "feature/**"]
+  pull_request:
+    branches: [master, develop]
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: "Typ aktualizacji wersji (major, minor, patch)"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - major
+          - minor
+          - patch
+
+jobs:
+  version-bump:
+    name: Aktualizacja wersji
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    outputs:
+      new_version: ${{ steps.bump_version.outputs.new_version }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Git
+        run: |
+          git config --global user.name 'GitHub Actions'
+          git config --global user.email 'actions@github.com'
+
+      - name: Get Current Version
+        id: get_version
+        run: |
+          CURRENT_VERSION=$(grep -oP 'version: \K[0-9]+\.[0-9]+\.[0-9]+' pubspec.yaml)
+          echo "current_version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Bump Version
+        id: bump_version
+        run: |
+          CURRENT_VERSION=${{ steps.get_version.outputs.current_version }}
+          VERSION_TYPE=${{ github.event.inputs.version_type }}
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          if [ "$VERSION_TYPE" == "major" ]; then
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+          elif [ "$VERSION_TYPE" == "minor" ]; then
+            MINOR=$((MINOR + 1))
+            PATCH=0
+          else
+            PATCH=$((PATCH + 1))
+          fi
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+
+          sed -i "s/version: .*/version: $NEW_VERSION+$BUILD_NUMBER/" pubspec.yaml
+
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+
+      - name: Commit and Push
+        run: |
+          git add pubspec.yaml
+          git commit -m "Bump version to ${{ steps.bump_version.outputs.new_version }}+${{ steps.bump_version.outputs.build_number }}"
+          git push origin master
+
+      - name: Create Tag
+        run: |
+          git tag v${{ steps.bump_version.outputs.new_version }}
+          git push origin v${{ steps.bump_version.outputs.new_version }}
+
+  build-android:
+    name: Build Android
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.29.3"
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Update Build Number
+        if: github.ref != 'refs/heads/master'
+        run: |
+          CURRENT_VERSION=$(grep -oP 'version: \K[0-9]+\.[0-9]+\.[0-9]+' pubspec.yaml)
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          sed -i "s/version: .*/version: $CURRENT_VERSION+$BUILD_NUMBER/" pubspec.yaml
+
+      - name: Setup Keystore
+        if: github.ref == 'refs/heads/master' || github.ref == 'refs/heads/develop'
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/keystore.jks
+          echo "storePassword=${{ secrets.KEYSTORE_PASSWORD }}" > android/key.properties
+          echo "keyPassword=${{ secrets.KEY_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
+          echo "storeFile=keystore.jks" >> android/key.properties
+
+      - name: Build APK
+        run: flutter build apk --release
+
+      - name: Rename APK
+        run: |
+          BRANCH_NAME=${GITHUB_REF#refs/heads/}
+          BRANCH_NAME=${BRANCH_NAME//\//-}
+          VERSION=$(grep -oP 'version: \K[0-9]+\.[0-9]+\.[0-9]+\+[0-9]+' pubspec.yaml)
+          mv build/app/outputs/flutter-apk/app-release.apk build/app/outputs/flutter-apk/app-$BRANCH_NAME-$VERSION.apk
+
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build/app/outputs/flutter-apk/*.apk
+          retention-days: 7
+
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Pull Latest Changes
+        run: git pull origin ${{ github.ref_name }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 3.29.3
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Build iOS IPA
+        run: flutter build ios --release --no-codesign
+
+      - name: Create IPA File
+        run: |
+          mkdir -p Payload
+          mv build/ios/iphoneos/Runner.app Payload/
+          zip -qq -r -9 ios-ipa.ipa Payload
+
+      - name: Upload IPA Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: ios-ipa.ipa
+          retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build-android]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download APK Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: apk
+
+      - name: Get Previous Tag
+        id: previous_tag
+        run: |
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          PREVIOUS_TAG=$(git tag --sort=-creatordate | grep -v $CURRENT_TAG | head -n 1)
+          echo "previous_tag=$PREVIOUS_TAG" >> $GITHUB_OUTPUT
+
+      - name: Generate Changelog
+        id: changelog
+        run: |
+          PREVIOUS_TAG=${{ steps.previous_tag.outputs.previous_tag }} 
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "## Zmiany od $PREVIOUS_TAG do $CURRENT_TAG" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:"* %s (%h)" >> $GITHUB_ENV
+          echo "" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: apk/*.apk
+          body: ${{ env.CHANGELOG }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "761067003450",
+    "project_id": "purevideo",
+    "storage_bucket": "purevideo.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:761067003450:android:c7eacc68c0be11c5ea9f03",
+        "android_client_info": {
+          "package_name": "io.github.majusss.purevideo"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwZ2eBSYXYG39_oCE60mW-1QKj4xZOxoc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
