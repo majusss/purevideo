@@ -173,7 +173,7 @@ jobs:
   create-release:
     name: Create GitHub Release
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [build-android]
+    needs: [build-android, build-ios]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -186,6 +186,12 @@ jobs:
         with:
           name: android-apk
           path: apk
+
+      - name: Download IPA Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: ipa
 
       - name: Get Previous Tag
         id: previous_tag
@@ -210,7 +216,7 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: apk/*.apk
+          files: apk/*.apk, ipa/*.ipa
           body: ${{ env.CHANGELOG }}
           draft: false
           prerelease: false
