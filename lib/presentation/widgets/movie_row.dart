@@ -18,9 +18,9 @@ class MovieRow extends StatelessWidget {
           child: Text(
             title,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
           ),
         ),
         SizedBox(
@@ -34,29 +34,27 @@ class MovieRow extends StatelessWidget {
               final movie = movies[index];
               return AspectRatio(
                 aspectRatio: 11 / 16,
-                child: InkWell(
-                  onTap:
-                      () => context.pushNamed(
-                        'movie_details',
-                        pathParameters: {
-                          'service': movie.service.name,
-                          'url': movie.url,
-                        },
-                      ),
+                child: GestureDetector(
+                  onTap: () => context.pushNamed(
+                    'movie_details',
+                    pathParameters: {
+                      'service': movie.service.name,
+                      'url': movie.url,
+                    },
+                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: Image.network(
                       movie.imageUrl,
                       fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) => Container(
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.broken_image,
-                              size: 50,
-                              color: Colors.grey,
-                            ),
-                          ),
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.broken_image,
+                          size: 50,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
                   ),
                 ),

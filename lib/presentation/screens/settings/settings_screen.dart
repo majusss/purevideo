@@ -177,7 +177,7 @@ class _SettingsItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
-      child: InkWell(
+      child: GestureDetector(
         onTap: onTap,
         child: Padding(
           padding: const EdgeInsets.all(16),

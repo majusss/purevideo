@@ -1,13 +1,13 @@
 import 'package:go_router/go_router.dart';
-import 'package:purevideo/presentation/screens/about_screen.dart';
+import 'package:purevideo/presentation/screens/settings/about_screen.dart';
 import 'package:purevideo/presentation/screens/main_screen.dart';
 import 'package:purevideo/presentation/screens/home_screen.dart';
 import 'package:purevideo/presentation/screens/search_screen.dart';
 import 'package:purevideo/presentation/screens/categories_screen.dart';
 import 'package:purevideo/presentation/screens/my_list_screen.dart';
-import 'package:purevideo/presentation/screens/settings_screen.dart';
-import 'package:purevideo/presentation/screens/accounts_screen.dart';
-import 'package:purevideo/presentation/screens/login_screen.dart';
+import 'package:purevideo/presentation/screens/settings/settings_screen.dart';
+import 'package:purevideo/presentation/screens/settings/accounts_screen.dart';
+import 'package:purevideo/presentation/screens/settings/login_screen.dart';
 import 'package:purevideo/presentation/screens/movie_details_screen.dart';
 import 'package:purevideo/presentation/screens/player_screen.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';

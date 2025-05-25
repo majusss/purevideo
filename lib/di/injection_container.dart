@@ -2,6 +2,8 @@ import 'package:get_it/get_it.dart';
 import 'package:purevideo/core/services/settings_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/core/video_hosts/video_host_registry.dart';
+import 'package:purevideo/data/repositories/filman/filman_search_repository.dart';
+import 'package:purevideo/data/repositories/search_repository.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_auth_repository.dart';
@@ -31,6 +33,9 @@ void setupInjection() {
   });
   getIt.registerSingleton<Map<SupportedService, MovieRepository>>({
     SupportedService.filman: FilmanMovieRepository(),
+  });
+  getIt.registerSingleton<Map<SupportedService, SearchRepository>>({
+    SupportedService.filman: FilmanSearchRepository(),
   });
 
   getIt.registerFactory<AccountsBloc>(() => AccountsBloc());
