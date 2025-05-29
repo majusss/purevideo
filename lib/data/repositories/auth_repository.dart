@@ -4,7 +4,7 @@ import 'package:purevideo/data/models/account_model.dart';
 
 abstract class AuthRepository {
   Stream<AuthModel> get authStream;
-  Future<AuthModel> signIn(String email, String password, String captcha);
-  Future<AuthModel> restoreSession(AccountModel account);
+  Future<AuthModel> signIn(Map<String, String> fields);
+  // Future<AuthModel> restoreSession(AccountModel account);
   AccountModel? getAccountForService(SupportedService service);
 }

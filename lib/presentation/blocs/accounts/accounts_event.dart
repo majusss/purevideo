@@ -6,15 +6,11 @@ abstract class AccountsEvent {
 
 class SignInRequested extends AccountsEvent {
   final SupportedService service;
-  final String email;
-  final String password;
-  final String captcha;
+  final Map<String, String> fields;
 
   const SignInRequested({
     required this.service,
-    required this.email,
-    required this.password,
-    required this.captcha,
+    required this.fields,
   });
 }
 

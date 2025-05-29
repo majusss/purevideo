@@ -33,11 +33,10 @@ class AccountsScreen extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final service = SupportedService.values[index];
                   return GestureDetector(
-                    onTap:
-                        () => context.pushNamed(
-                          'login',
-                          pathParameters: {'service': service.toString()},
-                        ),
+                    onTap: () => context.pushNamed(
+                      'login',
+                      pathParameters: {'service': service.toString()},
+                    ),
                     child: Card(
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -76,8 +75,8 @@ class AccountsScreen extends StatelessWidget {
                       message: state.message,
                       onRetry: () {
                         context.read<AccountsBloc>().add(
-                          const LoadAccountsRequested(),
-                        );
+                              const LoadAccountsRequested(),
+                            );
                       },
                     );
                   }
@@ -90,25 +89,31 @@ class AccountsScreen extends StatelessWidget {
                       );
                     }
                     return Column(
-                      children:
-                          state.accounts.entries.map((account) {
-                            return ListTile(
-                              leading: SizedBox(
-                                height: 32,
-                                child: Image.network(account.key.image),
-                              ),
-                              title: Text(account.value.login),
-                              subtitle: Text(account.key.displayName),
-                              trailing: IconButton(
-                                icon: const Icon(Icons.delete),
-                                onPressed: () {
-                                  context.read<AccountsBloc>().add(
+                      children: state.accounts.entries.map((account) {
+                        return ListTile(
+                          leading: SizedBox(
+                            height: 32,
+                            child: Image.network(account.key.image),
+                          ),
+                          title: Text(account.value.fields.entries
+                              .firstWhere(
+                                  (element) =>
+                                      element.key == "login" ||
+                                      element.key == "email",
+                                  orElse: () =>
+                                      const MapEntry("login", "Unknown"))
+                              .value),
+                          subtitle: Text(account.key.displayName),
+                          trailing: IconButton(
+                            icon: const Icon(Icons.delete),
+                            onPressed: () {
+                              context.read<AccountsBloc>().add(
                                     SignOutRequested(account.key),
                                   );
-                                },
-                              ),
-                            );
-                          }).toList(),
+                            },
+                          ),
+                        );
+                      }).toList(),
                     );
                   }
                   return const SizedBox.shrink();

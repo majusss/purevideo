@@ -47,24 +47,17 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
 
       final repository = _repositories[event.service];
       if (repository == null) {
-        throw Exception(
-          'Nie znaleziono repozytorium dla serwisu: ${event.service}',
-        );
+        throw Exception('Brak obsługi serwisu ${event.service}');
       }
 
-      final result = await repository.signIn(
-        event.email,
-        event.password,
-        event.captcha,
-      );
+      final result = await repository.signIn(event.fields);
 
       if (result.success && result.account != null) {
         FirebaseAnalytics.instance.logLogin(
           loginMethod: event.service.name,
         );
         final account = AccountModel(
-          login: result.account!.login,
-          password: result.account!.password,
+          fields: result.account!.fields,
           cookies: result.account!.cookies,
           service: event.service,
         );

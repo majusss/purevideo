@@ -23,11 +23,6 @@ class UnsupportedHostException extends AppException {
       : super('Nieobsługiwany host wideo: ${Uri.tryParse(url)?.host ?? url}');
 }
 
-class MissingParamException extends AppException {
-  const MissingParamException(String param)
-      : super('Brakujący parametr: $param');
-}
-
 class UnauthorizedException extends AppException {
   const UnauthorizedException() : super('Wymagane zalogowanie się');
 }

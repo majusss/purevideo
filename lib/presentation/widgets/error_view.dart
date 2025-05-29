@@ -29,7 +29,7 @@ class ErrorView extends StatelessWidget {
             ElevatedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh),
-              label: const Text('Sprawdź ponownie'),
+              label: const Text('Spróbuj ponownie'),
             ),
           ],
         ),
