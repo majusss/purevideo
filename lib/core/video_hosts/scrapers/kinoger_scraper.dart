@@ -177,6 +177,7 @@ class KinoGerScraper extends VideoHostScraper {
       bool isEncrypt, Uint8List data, Uint8List key, Uint8List iv) {
     final params = ParametersWithIV<KeyParameter>(KeyParameter(key), iv);
     final paddingParams =
+        // ignore: prefer_void_to_null
         PaddedBlockCipherParameters<ParametersWithIV<KeyParameter>, Null>(
             params, null);
     final cipher = CBCBlockCipher(AESEngine());

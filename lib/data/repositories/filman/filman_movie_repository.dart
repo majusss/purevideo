@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/link_model.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -192,7 +191,6 @@ class FilmanMovieRepository implements MovieRepository {
               episodeElement.querySelector('a')?.attributes['href'];
 
           if (episodeUrl == null) {
-            debugPrint("Nie można pobrać odcinka $episodeTitle - brak URL");
             continue;
           }
 

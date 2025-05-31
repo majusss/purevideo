@@ -74,8 +74,6 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
   void _onSearchChanged(String query) {
     if (query.isEmpty) {
       context.read<SearchBloc>().add(const SearchCleared());
-    } else if (query.length >= 3) {
-      context.read<SearchBloc>().add(SearchRequested(query));
     }
   }
 
@@ -99,6 +97,8 @@ class _SearchScreenContentState extends State<SearchScreenContent> {
           child: TextField(
             controller: _searchController,
             onChanged: _onSearchChanged,
+            onSubmitted: (final query) =>
+                context.read<SearchBloc>().add(SearchRequested(query)),
             decoration: InputDecoration(
               hintText: 'Wpisz tytuł filmu...',
               prefixIcon: Icon(

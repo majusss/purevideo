@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/link_model.dart';
@@ -7,15 +6,11 @@ import 'package:purevideo/data/models/auth_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_dio_factory.dart';
+import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_utils.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 
 class ObejrzyjtoMovieRepository implements MovieRepository {
-  static final RegExp _bootstrapDataRegex = RegExp(
-    r'window\.bootstrapData\s*=\s*(\{.*?\});',
-    dotAll: true,
-  );
-
   final AuthRepository _authRepository = getIt<
       Map<SupportedService, AuthRepository>>()[SupportedService.obejrzyjto]!;
   final VideoSourceRepository _videoSourceRepository =
@@ -45,7 +40,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
 
     final episodeResponse = await _dio!.get(episode.url);
 
-    final bootstrapData = _extractBootstrapData(episodeResponse.data);
+    final bootstrapData = extractBootstrapData(episodeResponse.data);
 
     if (bootstrapData == null) {
       throw Exception(
@@ -70,45 +65,6 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     return episode.copyWith(
       videoUrls: videoUrls,
     );
-  }
-
-  String _generateSlug(String title) {
-    const Map<String, String> polishChars = {
-      'ą': 'a',
-      'Ą': 'a',
-      'ć': 'c',
-      'Ć': 'c',
-      'ę': 'e',
-      'Ę': 'e',
-      'ł': 'l',
-      'Ł': 'l',
-      'ń': 'n',
-      'Ń': 'n',
-      'ó': 'o',
-      'Ó': 'o',
-      'ś': 's',
-      'Ś': 's',
-      'ź': 'z',
-      'Ź': 'z',
-      'ż': 'z',
-      'Ż': 'z',
-    };
-
-    String slug = title;
-
-    polishChars.forEach((polish, replacement) {
-      slug = slug.replaceAll(polish, replacement);
-    });
-    slug = slug.toLowerCase();
-    slug = slug.replaceAll(RegExp(r'[:\.\*\(\)\[\]{}]'), ' ');
-    slug = slug.replaceAll(RegExp(r'[^\w\s-]'), ' ');
-    slug = slug.replaceAll(RegExp(r'\s+'), ' ');
-    slug = slug.trim();
-    slug = slug.replaceAll(' ', '-');
-    slug = slug.replaceAll(RegExp(r'-+'), '-');
-    slug = slug.replaceAll(RegExp(r'^-+|-+$'), '');
-
-    return slug;
   }
 
   Future<MovieDetailsModel> scrapeSeasons(
@@ -150,7 +106,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
         episodes.add(EpisodeModel(
           title: name,
           url:
-              '/titles/$movieId/${_generateSlug(movie.title)}/season/$i/episode/$j',
+              '/titles/$movieId/${generateSlug(movie.title)}/season/$i/episode/$j',
           videoUrls: [],
         ));
       }
@@ -168,7 +124,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     await _prepareDio();
 
     final response = await _dio!.get(url);
-    final bootstrapData = _extractBootstrapData(response.data);
+    final bootstrapData = extractBootstrapData(response.data);
 
     if (bootstrapData == null) {
       throw Exception(
@@ -270,21 +226,11 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     await _prepareDio();
 
     final response = await _dio!.get('/');
-    final bootstrapData = _extractBootstrapData(response.data);
+    final bootstrapData = extractBootstrapData(response.data);
 
     return bootstrapData != null
         ? _parseMoviesFromData(bootstrapData)
         : <MovieModel>[];
-  }
-
-  Map<String, dynamic>? _extractBootstrapData(String responseData) {
-    final match = _bootstrapDataRegex.firstMatch(responseData);
-    final jsonString = match?.group(1);
-
-    if (jsonString == null) return null;
-
-    final data = jsonDecode(jsonString);
-    return data is Map<String, dynamic> ? data : null;
   }
 
   List<MovieModel> _parseMoviesFromData(Map<String, dynamic> data) {

@@ -5,6 +5,7 @@ import 'package:purevideo/core/video_hosts/video_host_registry.dart';
 import 'package:purevideo/data/repositories/filman/filman_search_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_auth_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_movie_repository.dart';
+import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_search_repository.dart';
 import 'package:purevideo/data/repositories/search_repository.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
@@ -40,6 +41,7 @@ void setupInjection() {
   });
   getIt.registerSingleton<Map<SupportedService, SearchRepository>>({
     SupportedService.filman: FilmanSearchRepository(),
+    SupportedService.obejrzyjto: ObejrzyjtoSearchRepository(),
   });
 
   getIt.registerFactory<AccountsBloc>(() => AccountsBloc());
