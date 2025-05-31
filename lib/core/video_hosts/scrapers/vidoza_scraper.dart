@@ -12,7 +12,7 @@ class VidozaScraper extends VideoHostScraper {
   String get name => 'Vidoza';
 
   @override
-  List<String> get domains => ['vidoza.net'];
+  List<String> get domains => ['vidoza.net', 'vidoza.co', 'videzz.net'];
 
   @override
   Future<VideoSource?> getVideoSource(
@@ -34,6 +34,7 @@ class VidozaScraper extends VideoHostScraper {
         url: Uri.parse(directLink).toString(),
         lang: lang,
         quality: quality,
+        host: name,
         headers: {
           'Referer': url,
           'User-Agent':

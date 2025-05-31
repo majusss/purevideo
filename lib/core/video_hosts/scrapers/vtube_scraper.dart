@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
+// TODO: dead now?
 class VtubeScraper extends VideoHostScraper {
   final Dio _dio;
 
@@ -83,6 +84,7 @@ class VtubeScraper extends VideoHostScraper {
         url: Uri.parse(directLink).toString(),
         lang: lang,
         quality: quality,
+        host: name,
         headers: {
           'Referer': url,
           'User-Agent':

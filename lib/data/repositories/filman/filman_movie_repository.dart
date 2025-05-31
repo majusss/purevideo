@@ -65,9 +65,9 @@ class FilmanMovieRepository implements MovieRepository {
       final qualityVersion = tableData[2].text.trim();
 
       videoUrls.add(HostLink(
-        language,
-        qualityVersion,
-        link,
+        url: link,
+        lang: language,
+        quality: qualityVersion,
       ));
     }
 
@@ -123,9 +123,6 @@ class FilmanMovieRepository implements MovieRepository {
     final document = html.parse(response.data);
 
     final hostLinks = _extractHostLinksFromDocument(document);
-
-    debugPrint(
-        "Znaleziono ${hostLinks.length} hostlinków dla odcinka: $episodeUrl");
 
     return hostLinks;
   }

@@ -29,18 +29,16 @@ class PlayerScreen extends StatefulWidget {
   State<PlayerScreen> createState() => _PlayerScreenState();
 }
 
-// Enum dla kierunku przewijania
 enum SeekDirection { forward, backward }
 
 class _PlayerScreenState extends State<PlayerScreen> {
-  // Media Kit controllers
   late final Player _player;
   late final VideoController _controller;
   late StreamSubscription<Duration> _positionSubscription;
   late StreamSubscription<Duration?> _durationSubscription;
   late StreamSubscription<bool> _playingSubscription;
   late StreamSubscription<bool> _bufferingSubscription;
-  // Stan odtwarzacza
+
   bool _isPlaying = false;
   bool _isOverlayVisible = true;
   bool _isBuffering = true;
@@ -54,15 +52,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
   String? _errorMessage;
   String _displayState = "Ładowanie...";
 
-  // Timer do automatycznego ukrywania kontrolek
   Timer? _hideControlsTimer;
 
   final VideoSourceRepository _videoSourceRepository =
       getIt<VideoSourceRepository>();
   late MovieRepository _movieRepository;
+
   @override
   void initState() {
     super.initState();
+    // TODO: kiedy zrobie laczenie roznych zrodel to trzeba bedzie tu pobierac kazde movie repository
     _movieRepository =
         getIt<Map<SupportedService, MovieRepository>>()[widget.movie.service]!;
     _initMediaKit();
@@ -219,7 +218,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
       _seekDirection = direction;
       _isSeeking = true;
 
-      // Automatyczne ukrywanie kontrolek gdy użytkownik przewija
       _isOverlayVisible = false;
 
       Future.delayed(const Duration(milliseconds: 400), () {
@@ -349,7 +347,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
     if (_errorMessage != null) {
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: Colors.white,
         body: ErrorView(
           message: _errorMessage!,
           onRetry: _loadVideoSources,
@@ -361,19 +359,16 @@ class _PlayerScreenState extends State<PlayerScreen> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Odtwarzacz wideo
           Video(
             controller: _controller,
             controls: NoVideoControls,
-            fit: BoxFit.contain,
+            fit: BoxFit.cover,
           ),
-
-          // Nakładka z kontrolkami
           SafeArea(child: _buildOverlay(title)),
         ],
       ),
     );
-  } // Funkcja do resetowania timera automatycznego ukrywania
+  }
 
   void _resetHideControlsTimer() {
     _hideControlsTimer?.cancel();
@@ -441,20 +436,22 @@ class _PlayerScreenState extends State<PlayerScreen> {
   Widget _buildDoubleTapControls() {
     return Row(
       children: [
-        SizedBox(
-          height: double.infinity,
-          width: MediaQuery.of(context).size.width * 0.5,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onDoubleTap: () => _seekWithDirection(SeekDirection.backward),
+        Expanded(
+          child: SizedBox(
+            height: double.infinity,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onDoubleTap: () => _seekWithDirection(SeekDirection.backward),
+            ),
           ),
         ),
-        SizedBox(
-          height: double.infinity,
-          width: MediaQuery.of(context).size.width * 0.5,
-          child: GestureDetector(
-            behavior: HitTestBehavior.translucent,
-            onDoubleTap: () => _seekWithDirection(SeekDirection.forward),
+        Expanded(
+          child: SizedBox(
+            height: double.infinity,
+            child: GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onDoubleTap: () => _seekWithDirection(SeekDirection.forward),
+            ),
           ),
         ),
       ],
@@ -560,7 +557,7 @@ class _PlayerScreenState extends State<PlayerScreen> {
                           (source) => PopupMenuItem<VideoSource>(
                             value: source,
                             child: Text(
-                              '${source.quality} - ${source.lang}',
+                              '${source.host}: ${source.quality} - ${source.lang}',
                               style: TextStyle(
                                 fontWeight: source == _selectedSource
                                     ? FontWeight.bold

@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
@@ -96,8 +95,6 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
   ) async {
     try {
       emit(const AccountsLoading());
-
-      debugPrint("Loading accounts");
 
       for (final service in _repositories.keys) {
         final account = await getAccountForService(service);

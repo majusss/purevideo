@@ -2,6 +2,9 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:purevideo/core/video_hosts/scrapers/doodstream_scraper.dart';
+import 'package:purevideo/core/video_hosts/scrapers/kinoger_scraper.dart';
+import 'package:purevideo/core/video_hosts/scrapers/lulustream_scraper.dart';
+import 'package:purevideo/core/video_hosts/scrapers/streamruby_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/streamtape_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/vidoza_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/vtube_scraper.dart';
@@ -19,9 +22,15 @@ class VideoHostsContainer {
       createHttpClient: () => ioc,
     );
 
+    // filman.cc
     registry.registerScraper(StreamtapeScraper(dio));
     registry.registerScraper(VidozaScraper(dio));
     registry.registerScraper(DoodStreamScraper(dio));
     registry.registerScraper(VtubeScraper(dio));
+
+    // obejrzyj.to
+    registry.registerScraper(KinoGerScraper(dio));
+    registry.registerScraper(LuluStreamScraper(dio));
+    registry.registerScraper(StreamrubyScraper(dio));
   }
 }

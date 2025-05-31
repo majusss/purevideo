@@ -13,12 +13,18 @@ abstract class VideoHostScraper {
 }
 
 class VideoSource {
-  final String url, lang, quality;
+  final String url, lang, quality, host;
   final Map<String, String>? headers;
 
   const VideoSource(
       {required this.url,
       required this.lang,
       required this.quality,
+      required this.host,
       this.headers});
+
+  @override
+  String toString() {
+    return 'VideoSource(url: $url, lang: $lang, quality: $quality, headers: $headers)';
+  }
 }

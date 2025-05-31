@@ -28,7 +28,6 @@ class FilmanAuthRepository implements AuthRepository {
       );
 
       if (accountJson != null) {
-        debugPrint(jsonDecode(accountJson));
         _account = AccountModel.fromJson(jsonDecode(accountJson));
         _dio = FilmanDioFactory.getDio(_account);
 
@@ -82,7 +81,6 @@ class FilmanAuthRepository implements AuthRepository {
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
         ),
       );
-      debugPrint(fields.toString());
 
       final document = html.parse(response.data);
       if (document.querySelector(".alert") != null) {

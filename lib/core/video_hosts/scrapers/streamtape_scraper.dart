@@ -62,6 +62,7 @@ class StreamtapeScraper extends VideoHostScraper {
         url: Uri.parse(directLink).toString(),
         lang: lang,
         quality: quality,
+        host: name,
         headers: {
           'Referer': url,
           'User-Agent':
