@@ -1,4 +1,4 @@
-[![Codemagic build status](https://api.codemagic.io/apps/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/status_badge.svg)](https://codemagic.io/app/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/latest_build)
+[![Codemagic build status](https://api.codemagic.io/apps/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/status_badge.svg)](https://codemagic.io/app/683314aa4db0dea63600e1f4/683314aa4db0dea63600e1f3/latest_build) [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/vjtkqAMQdn)](https://discord.gg/vjtkqAMQdn)
 
 # Opis Projektu: PureVideo - Aplikacja Streamingowa we Flutterze
 
