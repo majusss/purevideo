@@ -39,12 +39,15 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
       final results = <MovieModel>[];
 
-      await Future.wait(
-        _searchRepositories.entries.map((entry) async {
+      for (final entry in _searchRepositories.entries) {
+        try {
           final repositoryResults = await entry.value.searchMovies(event.query);
           results.addAll(repositoryResults);
-        }),
-      );
+        } catch (e) {
+          // Ignore errors from individual repositories
+          continue;
+        }
+      }
 
       emit(SearchLoaded(results));
     } catch (e) {
