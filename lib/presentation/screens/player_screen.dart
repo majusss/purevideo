@@ -61,7 +61,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
   @override
   void initState() {
     super.initState();
-    // TODO: kiedy zrobie laczenie roznych zrodel to trzeba bedzie tu pobierac kazde movie repository
     _movieRepository =
         getIt<Map<SupportedService, MovieRepository>>()[widget.movie.service]!;
     _initMediaKit();
@@ -161,6 +160,10 @@ class _PlayerScreenState extends State<PlayerScreen> {
           }
         });
       }
+
+      debugPrint(
+        'Loaded video sources: ${_videoSources?.map((e) => e.toString()).join(', ')}',
+      );
     } catch (e) {
       if (mounted) {
         setState(() {

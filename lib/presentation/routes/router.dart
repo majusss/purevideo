@@ -12,6 +12,7 @@ import 'package:purevideo/presentation/screens/movie_details_screen.dart';
 import 'package:purevideo/presentation/screens/player_screen.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
+import 'package:purevideo/presentation/screens/settings/theme_screen.dart';
 
 final router = GoRouter(
   initialLocation: '/',
@@ -36,6 +37,13 @@ final router = GoRouter(
       name: 'accounts',
       pageBuilder: (context, state) {
         return const NoTransitionPage(child: AccountsScreen());
+      },
+    ),
+    GoRoute(
+      path: '/settings/theme',
+      name: 'theme',
+      pageBuilder: (context, state) {
+        return const NoTransitionPage(child: ThemeScreen());
       },
     ),
     GoRoute(

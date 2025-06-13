@@ -45,5 +45,5 @@ void main() async {
     ),
   );
 
-  runApp(const PureVideoApp());
+  runApp(PureVideoApp());
 }

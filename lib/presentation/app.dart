@@ -1,38 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:purevideo/core/services/settings_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_bloc.dart';
 import 'package:purevideo/presentation/blocs/accounts/accounts_event.dart';
 import 'package:purevideo/presentation/blocs/movies/movies_bloc.dart';
 import 'package:purevideo/presentation/blocs/movies/movies_event.dart';
 import 'package:purevideo/presentation/routes/router.dart';
+import 'package:purevideo/presentation/widgets/settings_listenable.dart';
 
 class PureVideoApp extends StatelessWidget {
-  const PureVideoApp({super.key});
+  final SettingsService _settingsService = getIt();
+
+  PureVideoApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'PureVideo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      routerConfig: router,
-      builder: (context, child) {
-        return MultiBlocProvider(
-          providers: [
-            BlocProvider(
-              create:
-                  (_) => getIt<AccountsBloc>()..add(const LoadAccountsRequested()),
-            ),
-            BlocProvider(
-              create: (_) => getIt<MoviesBloc>()..add(LoadMoviesRequested()),
-            ),
-          ],
-          child: child!,
-        );
-      },
-    );
+    return SettingsListenable(builder: (context, box, child) {
+      return MaterialApp.router(
+        title: 'PureVideo',
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+          useMaterial3: true,
+        ),
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.deepPurple, brightness: Brightness.dark),
+          brightness: Brightness.dark,
+          useMaterial3: true,
+        ),
+        themeMode: _settingsService.theme,
+        routerConfig: router,
+        builder: (context, child) {
+          return MultiBlocProvider(
+            providers: [
+              BlocProvider(
+                create: (_) =>
+                    getIt<AccountsBloc>()..add(const LoadAccountsRequested()),
+              ),
+              BlocProvider(
+                create: (_) => getIt<MoviesBloc>()..add(LoadMoviesRequested()),
+              ),
+            ],
+            child: child!,
+          );
+        },
+      );
+    });
   }
 }

@@ -60,7 +60,6 @@ class _AboutScreenState extends State<AboutScreen> {
       ),
     );
 
-    // Wracamy od razu zamiast używać opóźnienia
     if (mounted) {
       GoRouter.of(context).pop();
     }
@@ -83,7 +82,6 @@ class _AboutScreenState extends State<AboutScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 24),
-              // Logo aplikacji
               Hero(
                 tag: 'app_logo',
                 child: Container(
@@ -131,8 +129,6 @@ class _AboutScreenState extends State<AboutScreen> {
               const SizedBox(height: 24),
               _buildCreatorsSection(context),
               const SizedBox(height: 24),
-              _buildLibrariesSection(context),
-              const SizedBox(height: 32),
               Text(
                 'majusss 2025',
                 style: textTheme.bodySmall?.copyWith(
@@ -203,10 +199,7 @@ class _AboutScreenState extends State<AboutScreen> {
             ),
             const SizedBox(height: 12),
             _buildCreatorItem(
-                context, 'Zespół PureVideo', 'Główni deweloperzy', Icons.code),
-            const Divider(),
-            _buildCreatorItem(context, 'Społeczność Open Source',
-                'Wkład i poprawki', Icons.people),
+                context, 'majusss', 'Główny developer', Icons.man),
           ],
         ),
       ),
@@ -251,71 +244,6 @@ class _AboutScreenState extends State<AboutScreen> {
                   ),
                 ),
               ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLibrariesSection(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Card(
-      elevation: 0,
-      color: colorScheme.surfaceContainerHighest,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Używane biblioteki',
-              style: textTheme.titleLarge,
-            ),
-            const SizedBox(height: 12),
-            _buildLibraryItem(context, 'Flutter', 'Framework UI'),
-            _buildLibraryItem(context, 'Dio', 'Klient HTTP'),
-            _buildLibraryItem(context, 'flutter_bloc', 'Zarządzanie stanem'),
-            _buildLibraryItem(context, 'MediaKit', 'Odtwarzacz multimediów'),
-            _buildLibraryItem(context, 'go_router', 'Nawigacja'),
-            _buildLibraryItem(context, 'Hive', 'Lokalna baza danych'),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLibraryItem(
-      BuildContext context, String name, String description) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: [
-          Icon(
-            Icons.check_circle,
-            size: 16,
-            color: colorScheme.primary,
-          ),
-          const SizedBox(width: 8),
-          Text(
-            name,
-            style: textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            '- $description',
-            style: textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
