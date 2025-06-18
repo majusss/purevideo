@@ -30,7 +30,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
 
   Future<void> _prepareDio() async {
     _dio ??= ObejrzyjtoDioFactory.getDio(
-      _authRepository.getAccountForService(SupportedService.obejrzyjto),
+      _authRepository.getAccount(),
     );
   }
 

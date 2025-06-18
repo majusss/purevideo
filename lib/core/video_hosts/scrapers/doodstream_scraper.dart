@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
-// TODO: fix Błąd podczas pobierania źródła z DoodStream(https://doply.net/e/hgpi85creac0): Bad state: No element
 class DoodStreamScraper extends VideoHostScraper {
   final Dio _dio;
 

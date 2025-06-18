@@ -1,3 +1,7 @@
+import 'package:hive_flutter/adapters.dart';
+
+part 'video_host_scraper.g.dart';
+
 abstract class VideoHostScraper {
   String get name;
 
@@ -12,8 +16,21 @@ abstract class VideoHostScraper {
   Future<VideoSource?> getVideoSource(String url, String lang, String quality);
 }
 
+@HiveType(typeId: 3)
 class VideoSource {
-  final String url, lang, quality, host;
+  @HiveField(0)
+  final String url;
+
+  @HiveField(1)
+  final String lang;
+
+  @HiveField(2)
+  final String quality;
+
+  @HiveField(3)
+  final String host;
+
+  @HiveField(4)
   final Map<String, String>? headers;
 
   const VideoSource(

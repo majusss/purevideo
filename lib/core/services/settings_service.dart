@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
+import 'package:hive_flutter/adapters.dart';
 
 class SettingsService {
   static const String _isDeveloperModeKey = 'isDeveloperMode';

@@ -1,4 +1,21 @@
+import 'package:hive_flutter/adapters.dart';
+
 enum SupportedService { filman, obejrzyjto }
+
+class SupportedServiceAdapter extends TypeAdapter<SupportedService> {
+  @override
+  final int typeId = 8;
+
+  @override
+  SupportedService read(BinaryReader reader) {
+    return SupportedService.values[reader.readInt()];
+  }
+
+  @override
+  void write(BinaryWriter writer, SupportedService obj) {
+    writer.writeInt(obj.index);
+  }
+}
 
 enum InputType { text, password, recaptcha }
 

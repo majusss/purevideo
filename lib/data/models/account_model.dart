@@ -11,7 +11,7 @@ class AccountModel {
     required this.service,
   });
 
-  factory AccountModel.fromJson(Map<String, dynamic> json) {
+  factory AccountModel.fromMap(Map<String, dynamic> json) {
     return AccountModel(
       fields: (json['fields'] as Map<String, dynamic>).map(
         (key, value) => MapEntry(key, value.toString()),
@@ -22,7 +22,7 @@ class AccountModel {
     );
   }
 
-  Map<String, dynamic> toJson() {
+  Map<String, dynamic> toMap() {
     return {
       'fields': fields,
       'cookies': cookies,

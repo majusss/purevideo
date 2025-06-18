@@ -28,7 +28,7 @@ class FilmanAuthRepository implements AuthRepository {
       );
 
       if (accountJson != null) {
-        _account = AccountModel.fromJson(jsonDecode(accountJson));
+        _account = AccountModel.fromMap(jsonDecode(accountJson));
         _dio = FilmanDioFactory.getDio(_account);
 
         try {
@@ -127,11 +127,24 @@ class FilmanAuthRepository implements AuthRepository {
   }
 
   @override
-  AccountModel? getAccountForService(SupportedService service) {
+  AccountModel? getAccount() {
     return _account;
   }
 
-  void dispose() {
-    _authController.close();
+  @override
+  Future<void> signOut() async {
+    _account = null;
+    _dio = FilmanDioFactory.getDio(null);
+    _authController.add(
+      AuthModel(
+        service: SupportedService.filman,
+        success: false,
+        account: null,
+      ),
+    );
+    await SecureStorageService.deleteServiceData(
+      SupportedService.filman,
+      'account',
+    );
   }
 }

@@ -25,9 +25,7 @@ class FilmanSearchRepository implements SearchRepository {
 
   Future<void> _prepareDio() async {
     if (_dio == null) {
-      final account = _authRepository.getAccountForService(
-        SupportedService.filman,
-      );
+      final account = _authRepository.getAccount();
       _dio = FilmanDioFactory.getDio(account);
     }
   }

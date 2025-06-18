@@ -12,7 +12,13 @@ import 'package:purevideo/core/video_hosts/video_host_registry.dart';
 
 class VideoHostsContainer {
   static void registerVideoScrapers(VideoHostRegistry registry) {
-    final Dio dio = Dio();
+    final Dio dio = Dio(
+      BaseOptions(
+        connectTimeout: const Duration(seconds: 10),
+        receiveTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
+      ),
+    );
 
     final ioc = HttpClient();
     ioc.badCertificateCallback =

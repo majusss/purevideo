@@ -21,7 +21,11 @@ class StreamtapeScraper extends VideoHostScraper {
   Future<VideoSource?> getVideoSource(
       String url, String lang, String quality) async {
     try {
-      final response = await _dio.get(url);
+      final response = await _dio.get(url,
+          options: Options(
+            followRedirects: false,
+            validateStatus: (status) => true,
+          ));
       final jsLineMatch = RegExp(
         r"(?<=document\.getElementById\('botlink'\)\.innerHTML = )(.*)(?=;)",
       ).firstMatch(response.data);
@@ -48,8 +52,7 @@ class StreamtapeScraper extends VideoHostScraper {
         fullUrl,
         options: Options(
           followRedirects: false,
-          validateStatus: (status) =>
-              status != null && status >= 200 && status < 400,
+          validateStatus: (status) => true,
         ),
       );
 
@@ -70,7 +73,7 @@ class StreamtapeScraper extends VideoHostScraper {
         },
       );
     } catch (e) {
-      debugPrint('Błąd podczas pobierania źródła ze Streamtape: $e');
+      debugPrint('Błąd podczas pobierania źródła ze Streamtape($url): $e');
       return null;
     }
   }

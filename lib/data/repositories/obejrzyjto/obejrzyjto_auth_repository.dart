@@ -27,7 +27,7 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
       );
 
       if (accountJson != null) {
-        _account = AccountModel.fromJson(jsonDecode(accountJson));
+        _account = AccountModel.fromMap(jsonDecode(accountJson));
         _dio = ObejrzyjtoDioFactory.getDio(_account);
 
         try {
@@ -147,11 +147,24 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
   }
 
   @override
-  AccountModel? getAccountForService(SupportedService service) {
+  AccountModel? getAccount() {
     return _account;
   }
 
-  void dispose() {
-    _authController.close();
+  @override
+  Future<void> signOut() async {
+    _account = null;
+    _dio = ObejrzyjtoDioFactory.getDio(null);
+    _authController.add(
+      AuthModel(
+        service: SupportedService.obejrzyjto,
+        success: false,
+        account: null,
+      ),
+    );
+    await SecureStorageService.deleteServiceData(
+      SupportedService.obejrzyjto,
+      'account',
+    );
   }
 }

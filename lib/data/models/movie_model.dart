@@ -1,12 +1,25 @@
+import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/link_model.dart';
 
+part 'movie_model.g.dart';
+
+@HiveType(typeId: 0)
 class MovieModel {
+  @HiveField(0)
   final SupportedService service;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final String imageUrl;
+
+  @HiveField(3)
   final String url;
+
+  @HiveField(4)
   final String? category;
 
   const MovieModel({
@@ -18,10 +31,18 @@ class MovieModel {
   });
 }
 
+@HiveType(typeId: 1)
 class EpisodeModel {
+  @HiveField(0)
   final String url;
+
+  @HiveField(1)
   final String title;
+
+  @HiveField(2)
   final List<HostLink>? videoUrls;
+
+  @HiveField(3)
   final List<VideoSource>? directUrls;
 
   const EpisodeModel(
@@ -44,8 +65,12 @@ class EpisodeModel {
   }
 }
 
+@HiveType(typeId: 4)
 class SeasonModel {
+  @HiveField(0)
   final String name;
+
+  @HiveField(1)
   final List<EpisodeModel> episodes;
 
   const SeasonModel({required this.name, required this.episodes});
@@ -59,19 +84,44 @@ class SeasonModel {
   }
 }
 
+@HiveType(typeId: 5)
 class MovieDetailsModel {
+  @HiveField(0)
   final SupportedService service;
+
+  @HiveField(1)
   final String url;
+
+  @HiveField(2)
   final String title;
+
+  @HiveField(3)
   final String description;
+
+  @HiveField(4)
   final String imageUrl;
+
+  @HiveField(5)
   final List<HostLink>? videoUrls;
+
+  @HiveField(6)
   final List<VideoSource>? directUrls;
+
+  @HiveField(7)
   final String year;
+
+  @HiveField(8)
   final List<String> genres;
+
+  @HiveField(9)
   final List<String> countries;
+
+  @HiveField(10)
   final bool isSeries;
+
+  @HiveField(11)
   final List<SeasonModel>? seasons;
+
   const MovieDetailsModel(
       {required this.service,
       required this.url,
@@ -122,60 +172,34 @@ class MovieDetailsModel {
   }
 }
 
+@HiveType(typeId: 6)
 class Season {
+  @HiveField(0)
   final String name;
+
+  @HiveField(1)
   final List<Episode> episodes;
 
   const Season({
     required this.name,
     required this.episodes,
   });
-
-  factory Season.fromJson(Map<String, dynamic> json) {
-    return Season(
-      name: json['name'] as String,
-      episodes: (json['episodes'] as List<dynamic>)
-          .map((e) => Episode.fromJson(e as Map<String, dynamic>))
-          .toList(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'episodes': episodes.map((e) => e.toJson()).toList(),
-    };
-  }
 }
 
+@HiveType(typeId: 7)
 class Episode {
+  @HiveField(0)
   final String title;
+
+  @HiveField(1)
   final String url;
+
+  @HiveField(2)
   final String description;
-  final List<String> links;
 
   const Episode({
     required this.title,
     required this.url,
     required this.description,
-    required this.links,
   });
-
-  factory Episode.fromJson(Map<String, dynamic> json) {
-    return Episode(
-      title: json['title'] as String,
-      url: json['url'] as String,
-      description: json['description'] as String,
-      links: (json['links'] as List<dynamic>).map((e) => e as String).toList(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'title': title,
-      'url': url,
-      'description': description,
-      'links': links,
-    };
-  }
 }
