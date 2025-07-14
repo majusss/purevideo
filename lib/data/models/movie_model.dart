@@ -37,28 +37,40 @@ class EpisodeModel {
   final String url;
 
   @HiveField(1)
-  final String title;
+  final int number;
 
   @HiveField(2)
-  final List<HostLink>? videoUrls;
+  final String title;
 
   @HiveField(3)
+  final List<HostLink>? videoUrls;
+
+  @HiveField(4)
   final List<VideoSource>? directUrls;
 
-  const EpisodeModel(
+  late SeasonModel season;
+
+  void attachSeason(SeasonModel season) {
+    this.season = season;
+  }
+
+  EpisodeModel(
       {required this.title,
+      required this.number,
       required this.url,
       required this.videoUrls,
       this.directUrls});
 
   EpisodeModel copyWith({
     String? url,
+    int? number,
     String? title,
     List<HostLink>? videoUrls,
     List<VideoSource>? directUrls,
   }) {
     return EpisodeModel(
         url: url ?? this.url,
+        number: number ?? this.number,
         title: title ?? this.title,
         videoUrls: videoUrls ?? this.videoUrls,
         directUrls: directUrls ?? this.directUrls);
@@ -71,16 +83,16 @@ class SeasonModel {
   final String name;
 
   @HiveField(1)
+  final int number;
+
+  @HiveField(2)
   final List<EpisodeModel> episodes;
 
-  const SeasonModel({required this.name, required this.episodes});
-
-  SeasonModel copyWith({
-    String? name,
-    List<EpisodeModel>? episodes,
-  }) {
-    return SeasonModel(
-        name: name ?? this.name, episodes: episodes ?? this.episodes);
+  SeasonModel(
+      {required this.name, required this.number, required this.episodes}) {
+    for (var episode in episodes) {
+      episode.attachSeason(this);
+    }
   }
 }
 

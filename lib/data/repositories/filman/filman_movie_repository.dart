@@ -179,11 +179,13 @@ class FilmanMovieRepository implements MovieRepository {
 
     if (isSeries) {
       final seasons = <SeasonModel>[];
-      for (final seasonElement in episodeList.children) {
+      for (int i = 0; i < episodeList.children.length; i++) {
+        final seasonElement = episodeList.children[i];
         final seasonName = seasonElement.children.first.text.trim();
         final episodes = <EpisodeModel>[];
 
-        for (final episodeElement in seasonElement.children.last.children) {
+        for (int j = 0; j < seasonElement.children.last.children.length; j++) {
+          final episodeElement = seasonElement.children.last.children[j];
           final episodeTitle = episodeElement.text.trim();
           final episodeUrl =
               episodeElement.querySelector('a')?.attributes['href'];
@@ -193,12 +195,18 @@ class FilmanMovieRepository implements MovieRepository {
           }
 
           episodes.add(
-            EpisodeModel(title: episodeTitle, url: episodeUrl, videoUrls: []),
+            EpisodeModel(
+                title: episodeTitle,
+                number: seasonElement.children.last.children.length - j,
+                url: episodeUrl,
+                videoUrls: []),
           );
         }
 
         seasons.add(SeasonModel(
-            name: seasonName, episodes: episodes.toList().reversed.toList()));
+            name: seasonName,
+            number: episodeList.children.length - i,
+            episodes: episodes.toList().reversed.toList()));
       }
 
       return MovieDetailsModel(

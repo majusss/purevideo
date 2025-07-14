@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter/material.dart';
 import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:purevideo/core/services/watched_service.dart';
@@ -167,9 +166,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
           errorMessage: 'Nie znaleziono źródeł odtwarzania',
         ));
       }
-
-      debugPrint(
-          'Loaded video sources: ${movieDetails.directUrls?.map((e) => e.toString()).join(', ')}');
     } catch (e) {
       emit(state.copyWith(
         isLoading: false,
@@ -190,8 +186,22 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     try {
       final Map<String, String> headers = event.source.headers ?? {};
 
+      int? watchedPosition;
+
+      if (_seasonIndex != null && _episodeIndex != null) {
+        final episode =
+            _movie!.seasons![_seasonIndex!].episodes[_episodeIndex!];
+        final watchedEpisode = watchedService.getByEpisode(_movie!, episode);
+        watchedPosition = watchedEpisode?.watchedTime;
+      } else {
+        final watchedMovie = watchedService.getByMovie(_movie!);
+        watchedPosition = watchedMovie?.watchedTime;
+      }
+
       await _player.open(
-        Media(event.source.url, httpHeaders: headers),
+        Media(event.source.url,
+            httpHeaders: headers,
+            start: Duration(seconds: watchedPosition ?? 0)),
         play: true,
       );
 

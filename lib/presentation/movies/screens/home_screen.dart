@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:purevideo/core/services/watched_service.dart';
+import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movies/bloc/movies_bloc.dart';
 import 'package:purevideo/presentation/movies/bloc/movies_event.dart';
 import 'package:purevideo/presentation/movies/bloc/movies_state.dart';
@@ -15,10 +18,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  final WatchedService _watchedService = getIt<WatchedService>();
+  StreamSubscription? _watchedSubscription;
+
   @override
   void initState() {
     super.initState();
     context.read<MoviesBloc>().add(LoadMoviesRequested());
+    _setupWatchedListener();
+  }
+
+  @override
+  void dispose() {
+    _watchedSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupWatchedListener() {
+    _watchedSubscription = _watchedService.watchedStream.listen((watchedList) {
+      debugPrint(
+          'HomeScreen: Watched list updated: ${watchedList.length} items');
+
+      if (mounted) {
+        context.read<MoviesBloc>().add(LoadMoviesRequested());
+      }
+    });
   }
 
   @override

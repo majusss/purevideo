@@ -29,7 +29,6 @@ class SettingsService {
   bool get isDarkMode => bool.parse(box.get(_isDarkModeKey) ?? "false");
 
   void setDarkMode(bool value) {
-    debugPrint('Setting dark mode to $value');
     box.put(_isDarkModeKey, value.toString());
   }
 

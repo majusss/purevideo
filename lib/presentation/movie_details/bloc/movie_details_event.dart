@@ -1,6 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
+import 'package:purevideo/data/models/watched_model.dart';
 
 abstract class MovieDetailsEvent extends Equatable {
   const MovieDetailsEvent();
@@ -82,4 +83,13 @@ class ScrapeCurrentSeasonEpisodes extends MovieDetailsEvent {
 
   @override
   List<Object> get props => [service];
+}
+
+class UpdateWatchedStatus extends MovieDetailsEvent {
+  final WatchedMovieModel? watched;
+
+  const UpdateWatchedStatus({required this.watched});
+
+  @override
+  List<Object?> get props => [watched];
 }

@@ -63,24 +63,27 @@ class EpisodeModelAdapter extends TypeAdapter<EpisodeModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return EpisodeModel(
-      title: fields[1] as String,
+      title: fields[2] as String,
+      number: fields[1] as int,
       url: fields[0] as String,
-      videoUrls: (fields[2] as List?)?.cast<HostLink>(),
-      directUrls: (fields[3] as List?)?.cast<VideoSource>(),
+      videoUrls: (fields[3] as List?)?.cast<HostLink>(),
+      directUrls: (fields[4] as List?)?.cast<VideoSource>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, EpisodeModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(5)
       ..writeByte(0)
       ..write(obj.url)
       ..writeByte(1)
-      ..write(obj.title)
+      ..write(obj.number)
       ..writeByte(2)
-      ..write(obj.videoUrls)
+      ..write(obj.title)
       ..writeByte(3)
+      ..write(obj.videoUrls)
+      ..writeByte(4)
       ..write(obj.directUrls);
   }
 
@@ -107,17 +110,20 @@ class SeasonModelAdapter extends TypeAdapter<SeasonModel> {
     };
     return SeasonModel(
       name: fields[0] as String,
-      episodes: (fields[1] as List).cast<EpisodeModel>(),
+      number: fields[1] as int,
+      episodes: (fields[2] as List).cast<EpisodeModel>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, SeasonModel obj) {
     writer
-      ..writeByte(2)
+      ..writeByte(3)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
+      ..write(obj.number)
+      ..writeByte(2)
       ..write(obj.episodes);
   }
 

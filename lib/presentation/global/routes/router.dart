@@ -82,7 +82,6 @@ final router = GoRouter(
         final int? episodeIndex = (state.uri.queryParameters['episode'] != null)
             ? int.tryParse(state.uri.queryParameters['episode']!)
             : null;
-
         return NoTransitionPage(
           child: PlayerScreen(
             movie: movie,

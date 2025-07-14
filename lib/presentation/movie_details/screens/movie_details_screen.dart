@@ -1,13 +1,14 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_bloc.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_event.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_state.dart';
 import 'package:purevideo/presentation/global/widgets/error_view.dart';
-import 'package:purevideo/core/services/settings_service.dart';
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
@@ -32,13 +33,46 @@ class MovieDetailsScreen extends StatelessWidget {
   }
 }
 
-class MovieDetailsView extends StatelessWidget {
+class MovieDetailsView extends StatefulWidget {
   const MovieDetailsView({super.key});
+
+  @override
+  State<MovieDetailsView> createState() => _MovieDetailsViewState();
+}
+
+class _MovieDetailsViewState extends State<MovieDetailsView> {
+  final WatchedService _watchedService = getIt<WatchedService>();
+  StreamSubscription? _watchedSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    _setupWatchedListener();
+  }
+
+  @override
+  void dispose() {
+    _watchedSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _setupWatchedListener() {
+    _watchedSubscription = _watchedService.watchedStream.listen((watchedList) {
+      if (mounted) {
+        final bloc = context.read<MovieDetailsBloc>();
+        if (bloc.state.movie != null) {
+          final watched = _watchedService.getByMovie(bloc.state.movie!);
+          bloc.add(UpdateWatchedStatus(watched: watched));
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<MovieDetailsBloc, MovieDetailsState>(
       builder: (context, state) {
+        debugPrint("chuj ${state.watched}");
         if (state.movie != null) {
           return _buildMovieDetails(context, state);
         } else if (state.errorMessage != null) {
@@ -117,7 +151,6 @@ class MovieDetailsView extends StatelessWidget {
                       if (movie.genres.isNotEmpty)
                         Wrap(
                           spacing: 8.0,
-                          runSpacing: 8.0,
                           children: movie.genres
                               .map(
                                 (genre) => Chip(
@@ -191,9 +224,6 @@ class MovieDetailsView extends StatelessWidget {
                       ),
                       const SizedBox(height: 16),
                       _buildPlayButton(context, state),
-                      if (!state.isSeries &&
-                          getIt<SettingsService>().isDebugVisible)
-                        _buildMovieDebugPanel(context, state),
                     ],
                   ),
                 ),
@@ -246,14 +276,29 @@ class MovieDetailsView extends StatelessWidget {
         }
       },
       icon: const Icon(Icons.play_arrow),
-      label: Text(
-          "Oglądaj ${movie.isSeries ? 'sezon ${state.selectedSeasonIndex + 1}' : ''}"),
+      label: Text(watchedText(state)),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
         minimumSize: const Size(double.infinity, 0),
         textStyle: textTheme.titleMedium,
       ),
     );
+  }
+
+  String watchedText(MovieDetailsState state) {
+    if (state.watched != null) {
+      if (state.movie!.isSeries) {
+        return 'Kontynuuj odcinek ${state.watched!.lastWatchedEpisode?.episode.number}';
+      } else {
+        return 'Kontynuuj';
+      }
+    } else {
+      if (state.movie!.isSeries) {
+        return 'Oglądaj sezon ${state.selectedSeasonIndex + 1}';
+      } else {
+        return 'Oglądaj';
+      }
+    }
   }
 
   Widget _buildInfoChip(IconData icon, String text, BuildContext context) {
@@ -322,91 +367,6 @@ class MovieDetailsView extends StatelessWidget {
               ),
           ],
         ),
-        if (getIt<SettingsService>().isDebugVisible)
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            child: Container(
-              padding: const EdgeInsets.all(8.0),
-              decoration: BoxDecoration(
-                color: colorScheme.surfaceContainerHighest,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "Debug - Status odcinków:",
-                    style: textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.play_circle_filled,
-                          size: 16, color: Colors.green),
-                      const SizedBox(width: 4),
-                      Text(
-                        "Wczytane",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.hourglass_top,
-                          size: 16, color: Colors.orange),
-                      const SizedBox(width: 4),
-                      Text(
-                        "Wczytywanie",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      const Icon(Icons.play_circle_outline,
-                          size: 16, color: Colors.grey),
-                      const SizedBox(width: 4),
-                      Text(
-                        "Niewczytane",
-                        style: textTheme.bodySmall?.copyWith(
-                          color: colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Divider(
-                      height: 16,
-                      color: colorScheme.outline..withValues(alpha: 0.5)),
-                  Text(
-                    "Statystyki:",
-                    style: textTheme.bodySmall?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    "Całkowita liczba odcinków: ${state.episodes.length}",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                  Text(
-                    "Odcinki wczytane: ${state.episodes.where((e) => e.directUrls != null && e.directUrls!.isNotEmpty).length}",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: Colors.green,
-                    ),
-                  ),
-                  Text(
-                    "Odcinki z URLami wideo: ${state.episodes.length}",
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
@@ -426,7 +386,7 @@ class MovieDetailsView extends StatelessWidget {
               leading: CircleAvatar(
                 backgroundColor: colorScheme.secondaryContainer,
                 child: Text(
-                  '${index + 1}',
+                  episode.number.toString(),
                   style: textTheme.bodyMedium
                       ?.copyWith(color: colorScheme.onSecondaryContainer),
                 ),
@@ -449,149 +409,6 @@ class MovieDetailsView extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildMovieDebugPanel(BuildContext context, MovieDetailsState state) {
-    final textTheme = Theme.of(context).textTheme;
-    final colorScheme = Theme.of(context).colorScheme;
-    final movie = state.movie!;
-    final hasDirectUrls =
-        movie.directUrls != null && movie.directUrls!.isNotEmpty;
-    final bloc = context.read<MovieDetailsBloc>();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 16.0),
-      child: Container(
-        padding: const EdgeInsets.all(8.0),
-        decoration: BoxDecoration(
-          color: colorScheme.surfaceContainerHighest,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Debug - Status filmu:",
-              style: textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Row(
-              children: [
-                Icon(
-                  hasDirectUrls
-                      ? Icons.play_circle_filled
-                      : Icons.play_circle_outline,
-                  size: 16,
-                  color: hasDirectUrls ? Colors.green : Colors.grey,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  hasDirectUrls ? "Źródła wczytane" : "Brak źródeł",
-                  style: textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
-                  ),
-                ),
-              ],
-            ),
-            Divider(
-                height: 16, color: colorScheme.outline.withValues(alpha: 0.5)),
-            Text(
-              "Statystyki:",
-              style: textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              "Host URLs: ${movie.videoUrls?.length ?? 0}",
-              style: textTheme.bodySmall?.copyWith(
-                color: colorScheme.onSurfaceVariant,
-              ),
-            ),
-            Text(
-              "Direct URLs: ${movie.directUrls?.length ?? 0}",
-              style: textTheme.bodySmall?.copyWith(
-                color: hasDirectUrls ? Colors.green : Colors.grey,
-              ),
-            ),
-            const SizedBox(height: 8),
-            FilledButton.icon(
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Debug filmu"),
-                    content: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text("Tytuł: ${movie.title}"),
-                          Text("URL: ${movie.url}"),
-                          const Divider(),
-                          Text(
-                            "Host URLs: ${movie.videoUrls?.length ?? 0}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          ...(movie.videoUrls ?? [])
-                              .map((link) => Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                        "${link.url} (${link.lang}, ${link.quality})"),
-                                  ))
-                              .toList(),
-                          const Divider(),
-                          Text(
-                            "Direct URLs: ${movie.directUrls?.length ?? 0}",
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                          ...(movie.directUrls ?? [])
-                              .map((src) => Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
-                                    child: Text(
-                                        "${src.url} (${src.lang}, ${src.quality})"),
-                                  ))
-                              .toList(),
-                        ],
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("Zamknij"),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          bloc.add(ScrapeVideoUrls(
-                            movie: movie,
-                            service: movie.service,
-                          ));
-                          Navigator.of(context).pop();
-                        },
-                        child: const Text("Scrapuj ponownie"),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              icon: const Icon(Icons.bug_report, size: 16),
-              label: const Text("Szczegóły debugowania"),
-              style: FilledButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                textStyle: textTheme.bodySmall,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

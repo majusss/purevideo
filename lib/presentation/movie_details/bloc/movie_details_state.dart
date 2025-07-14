@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:purevideo/data/models/movie_model.dart';
+import 'package:purevideo/data/models/watched_model.dart';
 
 class MovieDetailsState extends Equatable {
   final MovieDetailsModel? movie;
+  final WatchedMovieModel? watched;
   final String? errorMessage;
   final int selectedSeasonIndex;
   final List<String> directUrls;
@@ -20,6 +22,7 @@ class MovieDetailsState extends Equatable {
 
   const MovieDetailsState({
     this.movie,
+    this.watched,
     this.errorMessage,
     this.selectedSeasonIndex = 0,
     this.directUrls = const [],
@@ -27,6 +30,7 @@ class MovieDetailsState extends Equatable {
 
   MovieDetailsState copyWith({
     MovieDetailsModel? movie,
+    WatchedMovieModel? watched,
     String? errorMessage,
     int? selectedSeasonIndex,
     List<String>? directUrls,
@@ -35,6 +39,7 @@ class MovieDetailsState extends Equatable {
   }) {
     return MovieDetailsState(
       movie: movie ?? this.movie,
+      watched: watched ?? this.watched,
       errorMessage: errorMessage,
       selectedSeasonIndex: selectedSeasonIndex ?? this.selectedSeasonIndex,
       directUrls: directUrls ?? this.directUrls,
@@ -44,6 +49,7 @@ class MovieDetailsState extends Equatable {
   @override
   List<Object?> get props => [
         movie,
+        watched,
         errorMessage,
         selectedSeasonIndex,
         directUrls,

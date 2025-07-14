@@ -35,7 +35,7 @@ class PlayerState extends Equatable {
   PlayerState copyWith({
     bool? isLoading,
     bool? isPlaying,
-    bool? isBuffering,  
+    bool? isBuffering,
     bool? isOverlayVisible,
     bool? isSeeking,
     SeekDirection? seekDirection,

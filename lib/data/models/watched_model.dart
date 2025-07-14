@@ -1,5 +1,6 @@
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/data/models/movie_model.dart';
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 
 part 'watched_model.g.dart';
@@ -17,6 +18,11 @@ class WatchedEpisodeModel {
 
   WatchedEpisodeModel(
       {required this.episode, required this.watchedTime, this.watchedAt});
+
+  @override
+  String toString() {
+    return 'WatchedEpisodeModel(episode: $episode, watchedTime: $watchedTime, watchedAt: $watchedAt)';
+  }
 }
 
 @HiveType(typeId: 10)
@@ -33,6 +39,13 @@ class WatchedMovieModel {
   @HiveField(3)
   final DateTime watchedAt;
 
+  WatchedEpisodeModel? get lastWatchedEpisode {
+    return episodes?.reduce(
+      (current, next) =>
+          current.watchedAt!.isAfter(next.watchedAt!) ? current : next,
+    );
+  }
+
   WatchedMovieModel(
       {required this.movie,
       required this.watchedTime,
@@ -43,5 +56,10 @@ class WatchedMovieModel {
     return episodes?.firstWhereOrNull(
       (episode) => episode.episode.url == url,
     );
+  }
+
+  @override
+  String toString() {
+    return 'WatchedMovieModel(movie: $movie, episodes: $episodes, watchedTime: $watchedTime, watchedAt: $watchedAt)';
   }
 }

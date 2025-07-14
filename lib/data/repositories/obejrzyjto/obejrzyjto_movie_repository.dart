@@ -105,13 +105,14 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
         }
         episodes.add(EpisodeModel(
           title: name,
+          number: j,
           url:
               '/titles/$movieId/${generateSlug(movie.title)}/season/$i/episode/$j',
           videoUrls: [],
         ));
       }
 
-      seasons.add(SeasonModel(name: 'Sezon $i', episodes: episodes));
+      seasons.add(SeasonModel(name: 'Sezon $i', number: i, episodes: episodes));
     }
 
     return movie.copyWith(
