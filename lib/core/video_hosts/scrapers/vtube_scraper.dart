@@ -16,8 +16,8 @@ class VtubeScraper extends VideoHostScraper {
 
   String _deobfuscate(String p, final int a, int c, final List<String> k) {
     while (c-- > 0) {
-      if (k[c] != "") {
-        p = p.replaceAll(RegExp("\\b${c.toRadixString(a)}\\b"), k[c]);
+      if (k[c] != '') {
+        p = p.replaceAll(RegExp('\\b${c.toRadixString(a)}\\b'), k[c]);
       }
     }
     return p;
@@ -40,7 +40,7 @@ class VtubeScraper extends VideoHostScraper {
 
       final jsLineMatch = RegExp(
         r"(?<=<script type='text\/javascript'>eval\()(.*)(?=\)<\/script>)",
-      ).firstMatch(response.data.toString().replaceAll("\n", ""));
+      ).firstMatch(response.data.toString().replaceAll('\n', ''));
 
       if (jsLineMatch == null || jsLineMatch.group(0) == null) {
         return null;
@@ -50,7 +50,7 @@ class VtubeScraper extends VideoHostScraper {
 
       final removeStart = jsLine.replaceAll(
         "function(p,a,c,k,e,d){while(c--)if(k[c])p=p.replace(new RegExp('\\\\b'+c.toString(a)+'\\\\b','g'),k[c]);return p}(",
-        "",
+        '',
       );
 
       final removeEnd = removeStart.substring(0, removeStart.length - 1);
@@ -62,23 +62,23 @@ class VtubeScraper extends VideoHostScraper {
       }
 
       final firstArg = firstArgMatch.group(0)!;
-      final stringWithoutFirstArg = removeEnd.replaceFirst(firstArg, "");
+      final stringWithoutFirstArg = removeEnd.replaceFirst(firstArg, '');
       final normalizedArgs =
-          stringWithoutFirstArg.split(",").where((i) => i.isNotEmpty);
+          stringWithoutFirstArg.split(',').where((i) => i.isNotEmpty);
 
       final int secondArg = int.parse(normalizedArgs.first);
       final int thirdArg = int.parse(normalizedArgs.elementAt(1));
       final fourthArg = normalizedArgs
           .elementAt(2)
-          .replaceAll(".split('|')", "")
-          .replaceAll("'", "")
-          .split("|");
+          .replaceAll(".split('|')", '')
+          .replaceAll("'", '')
+          .split('|');
 
       final String decoded =
           _deobfuscate(firstArg, secondArg, thirdArg, fourthArg);
       final directLink = decoded
-          .split("jwplayer(\\\"vplayer\\\").setup({sources:[{file:\\\"")[1]
-          .split("\\\"")[0];
+          .split('jwplayer(\\"vplayer\\").setup({sources:[{file:\\"')[1]
+          .split('\\"')[0];
 
       return VideoSource(
         url: Uri.parse(directLink).toString(),

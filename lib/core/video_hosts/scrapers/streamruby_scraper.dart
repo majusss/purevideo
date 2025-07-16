@@ -8,7 +8,7 @@ class StreamrubyScraper extends VideoHostScraper {
   StreamrubyScraper(this._dio);
 
   @override
-  String get name => "StreamRuby";
+  String get name => 'StreamRuby';
 
   @override
   List<String> get domains => [
@@ -72,7 +72,7 @@ class StreamrubyScraper extends VideoHostScraper {
         return _decode(payload, radix, count, keywords);
       }
     } catch (e) {
-      debugPrint("Błąd podczas rozpakowywania JS: $e");
+      debugPrint('Błąd podczas rozpakowywania JS: $e');
     }
     return '';
   }
@@ -132,7 +132,7 @@ class StreamrubyScraper extends VideoHostScraper {
         },
       );
     } catch (e) {
-      debugPrint("Błąd podczas pobierania źródła z StreamRuby($url): $e");
+      debugPrint('Błąd podczas pobierania źródła z StreamRuby($url): $e');
       return null;
     }
   }

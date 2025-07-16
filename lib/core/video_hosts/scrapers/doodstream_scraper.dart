@@ -36,7 +36,7 @@ class DoodStreamScraper extends VideoHostScraper {
   Future<VideoSource?> getVideoSource(
       String url, String lang, String quality) async {
     try {
-      final embedUrl = url.replaceAll("/d/", "/e/");
+      final embedUrl = url.replaceAll('/d/', '/e/');
       final response = await _dio.get(embedUrl);
 
       final host = _getBaseUrl(response.redirects.last.location.toString());
@@ -52,7 +52,7 @@ class DoodStreamScraper extends VideoHostScraper {
         md5,
         options: Options(
           headers: {
-            "Referer": host,
+            'Referer': host,
           },
           validateStatus: (_) => true,
         ),
@@ -80,12 +80,12 @@ class DoodStreamScraper extends VideoHostScraper {
 
   String _getBaseUrl(final String url) {
     final uri = Uri.parse(url);
-    return "${uri.scheme}://${uri.host}";
+    return '${uri.scheme}://${uri.host}';
   }
 
   String _createHashTable() {
     const alphabet =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     final random = Random();
     return List.generate(10, (_) => alphabet[random.nextInt(alphabet.length)])
         .join();

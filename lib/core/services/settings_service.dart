@@ -10,30 +10,35 @@ class SettingsService {
   late final Box box;
 
   Future<void> init() async {
-    box = await Hive.openBox('settings');
+    try {
+      box = await Hive.openBox('settings');
+    } catch (e) {
+      await Hive.deleteBoxFromDisk('settings');
+      box = await Hive.openBox('settings');
+    }
   }
 
   bool get isDeveloperMode =>
-      bool.parse(box.get(_isDeveloperModeKey) ?? "false");
+      bool.parse(box.get(_isDeveloperModeKey) ?? 'false');
 
   void setDeveloperMode(bool value) {
     box.put(_isDeveloperModeKey, value.toString());
   }
 
-  bool get isDebugVisible => bool.parse(box.get(_isDebugVisibleKey) ?? "false");
+  bool get isDebugVisible => bool.parse(box.get(_isDebugVisibleKey) ?? 'false');
 
   void setDebugVisible(bool value) {
     box.put(_isDebugVisibleKey, value.toString());
   }
 
-  bool get isDarkMode => bool.parse(box.get(_isDarkModeKey) ?? "false");
+  bool get isDarkMode => bool.parse(box.get(_isDarkModeKey) ?? 'false');
 
   void setDarkMode(bool value) {
     box.put(_isDarkModeKey, value.toString());
   }
 
   bool get isSystemBrightness =>
-      bool.parse(box.get(_isSystemBrightnessKey) ?? "true");
+      bool.parse(box.get(_isSystemBrightnessKey) ?? 'true');
 
   void setSystemBrightness(bool value) {
     box.put(_isSystemBrightnessKey, value.toString());

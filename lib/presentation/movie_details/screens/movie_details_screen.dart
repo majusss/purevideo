@@ -72,7 +72,6 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
   Widget build(BuildContext context) {
     return BlocBuilder<MovieDetailsBloc, MovieDetailsState>(
       builder: (context, state) {
-        debugPrint("chuj ${state.watched}");
         if (state.movie != null) {
           return _buildMovieDetails(context, state);
         } else if (state.errorMessage != null) {
@@ -98,7 +97,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                 Navigator.of(context).pop();
               },
               icon: const Icon(Icons.arrow_back),
-              label: const Text("Anuluj"),
+              label: const Text('Anuluj'),
             ),
           ],
         ),
@@ -265,7 +264,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
             extra: movie,
             queryParameters: {
               'season': state.selectedSeasonIndex.toString(),
-              'episode': "0",
+              'episode': '0',
             },
           );
         } else {
@@ -288,7 +287,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
   String watchedText(MovieDetailsState state) {
     if (state.watched != null) {
       if (state.movie!.isSeries) {
-        return 'Kontynuuj odcinek ${state.watched!.lastWatchedEpisode?.episode.number}';
+        return 'Kontynuuj odcinek ${state.watched!.lastWatchedEpisode?.watchedEpisode.episode.number}';
       } else {
         return 'Kontynuuj';
       }

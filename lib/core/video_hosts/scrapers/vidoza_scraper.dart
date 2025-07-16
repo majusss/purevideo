@@ -21,11 +21,11 @@ class VidozaScraper extends VideoHostScraper {
       final response = await _dio.get(url);
       final document = html.parse(response.data);
 
-      if (document.body?.text == "File was deleted") {
+      if (document.body?.text == 'File was deleted') {
         return null;
       }
 
-      final directLink = document.querySelector("source")?.attributes["src"];
+      final directLink = document.querySelector('source')?.attributes['src'];
       if (directLink == null) {
         return null;
       }

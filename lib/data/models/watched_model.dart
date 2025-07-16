@@ -5,6 +5,17 @@ import 'package:collection/collection.dart';
 
 part 'watched_model.g.dart';
 
+@HiveType(typeId: 11)
+class WatchedSeasonEpisode {
+  @HiveField(0)
+  final SeasonModel season;
+
+  @HiveField(1)
+  final WatchedEpisodeModel watchedEpisode;
+
+  WatchedSeasonEpisode({required this.season, required this.watchedEpisode});
+}
+
 @HiveType(typeId: 9)
 class WatchedEpisodeModel {
   @HiveField(0)
@@ -31,7 +42,7 @@ class WatchedMovieModel {
   final MovieDetailsModel movie;
 
   @HiveField(1)
-  final List<WatchedEpisodeModel>? episodes;
+  final List<WatchedSeasonEpisode>? episodes;
 
   @HiveField(2)
   final int watchedTime;
@@ -39,10 +50,28 @@ class WatchedMovieModel {
   @HiveField(3)
   final DateTime watchedAt;
 
-  WatchedEpisodeModel? get lastWatchedEpisode {
-    return episodes?.reduce(
-      (current, next) =>
-          current.watchedAt!.isAfter(next.watchedAt!) ? current : next,
+  WatchedSeasonEpisode? get lastWatchedEpisode {
+    if (episodes == null || episodes!.isEmpty) {
+      return null;
+    }
+
+    return episodes!.reduce(
+      (current, next) {
+        final currentDate = current.watchedEpisode.watchedAt;
+        final nextDate = next.watchedEpisode.watchedAt;
+
+        if (currentDate == null && nextDate == null) {
+          return current;
+        }
+        if (currentDate == null) {
+          return next;
+        }
+        if (nextDate == null) {
+          return current;
+        }
+
+        return currentDate.isAfter(nextDate) ? current : next;
+      },
     );
   }
 
@@ -53,9 +82,11 @@ class WatchedMovieModel {
       this.episodes});
 
   WatchedEpisodeModel? getEpisodeByUrl(String url) {
-    return episodes?.firstWhereOrNull(
-      (episode) => episode.episode.url == url,
-    );
+    return episodes
+        ?.firstWhereOrNull(
+          (episode) => episode.watchedEpisode.episode.url == url,
+        )
+        ?.watchedEpisode;
   }
 
   @override

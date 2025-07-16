@@ -46,7 +46,6 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
           );
           _account = null;
           _dio = ObejrzyjtoDioFactory.getDio(null);
-          debugPrint(e.toString());
         }
       } else {
         _dio = ObejrzyjtoDioFactory.getDio(null);
@@ -112,7 +111,7 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
         return authModel;
       }
 
-      final cookiesHeader = response.headers["set-cookie"];
+      final cookiesHeader = response.headers['set-cookie'];
 
       if (cookiesHeader != null) {
         _account = AccountModel(

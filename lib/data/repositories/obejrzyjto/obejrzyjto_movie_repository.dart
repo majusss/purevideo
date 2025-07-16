@@ -189,7 +189,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
       }
 
       videoUrls.add(HostLink(
-          url: url.replaceAll("?autoplay=1", ""),
+          url: url.replaceAll('?autoplay=1', ''),
           quality: quality,
           lang: lang));
     }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -47,8 +48,6 @@ class _PlayerScreenState extends State<PlayerScreen> {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
@@ -155,19 +154,6 @@ class PlayerView extends StatelessWidget {
   Widget _buildOverlay(BuildContext context, PlayerState state) {
     final bloc = context.read<PlayerBloc>();
 
-    final playerScreen = context.findAncestorWidgetOfExactType<PlayerScreen>();
-    final movie = playerScreen?.movie;
-
-    String title = movie?.title ?? '';
-    if (movie?.isSeries == true &&
-        playerScreen?.seasonIndex != null &&
-        playerScreen?.episodeIndex != null) {
-      final seasonIndex = playerScreen!.seasonIndex!;
-      final episodeIndex = playerScreen.episodeIndex!;
-      final episode = movie!.seasons![seasonIndex].episodes[episodeIndex];
-      title = '${movie.title} - ${episode.title}';
-    }
-
     return MouseRegion(
       onHover: (_) {
         if (!state.isOverlayVisible) {
@@ -191,10 +177,7 @@ class PlayerView extends StatelessWidget {
                 duration: const Duration(milliseconds: 300),
                 child: Stack(
                   children: [
-                    Container(
-                      color: Colors.black.withValues(alpha: 0.4),
-                    ),
-                    _buildTopBar(context, title),
+                    _buildTopBar(context),
                     _buildCenterPlayButton(state, bloc),
                     _buildBrightnessControl(context),
                     _buildIconsList(state, bloc),
@@ -277,6 +260,42 @@ class PlayerView extends StatelessWidget {
     );
   }
 
+  Widget _buildNextEpisodeButton(BuildContext context) {
+    final playerScreen = context.findAncestorWidgetOfExactType<PlayerScreen>();
+    final movie = playerScreen!.movie;
+    final seasonIndex = playerScreen.seasonIndex;
+    final episodeIndex = playerScreen.episodeIndex;
+
+    late Map<String, dynamic> queryParameters;
+
+    if (seasonIndex == null || episodeIndex == null) {
+      return const SizedBox.shrink();
+    }
+    final nextEpisodeIndex = episodeIndex + 1;
+    if (nextEpisodeIndex < movie.seasons![seasonIndex].episodes.length) {
+      queryParameters = {
+        'seasonIndex': seasonIndex,
+        'episodeIndex': nextEpisodeIndex,
+      };
+    } else if (seasonIndex + 1 < movie.seasons!.length) {
+      queryParameters = {
+        'seasonIndex': seasonIndex + 1,
+        'episodeIndex': 0,
+      };
+    } else {
+      return const SizedBox.shrink();
+    }
+
+    return OutlinedButton.icon(
+      onPressed: () {
+        context.replaceNamed('player',
+            extra: movie, queryParameters: queryParameters);
+      },
+      icon: const Text('Następny odcinek'),
+      label: const Icon(Icons.skip_next),
+    );
+  }
+
   Widget _buildBrightnessControl(BuildContext context) {
     return Positioned(
       left: 18,
@@ -319,7 +338,20 @@ class PlayerView extends StatelessWidget {
     return Icons.brightness_3;
   }
 
-  Widget _buildTopBar(BuildContext context, String title) {
+  Widget _buildTopBar(BuildContext context) {
+    final playerScreen = context.findAncestorWidgetOfExactType<PlayerScreen>();
+    final movie = playerScreen!.movie;
+
+    String title = movie.title;
+    if (movie.isSeries == true &&
+        playerScreen.seasonIndex != null &&
+        playerScreen.episodeIndex != null) {
+      final seasonIndex = playerScreen.seasonIndex!;
+      final episodeIndex = playerScreen.episodeIndex!;
+      final episode = movie.seasons![seasonIndex].episodes[episodeIndex];
+      title = '${movie.title} - ${episode.title}';
+    }
+
     return Align(
       alignment: Alignment.topCenter,
       child: Container(
@@ -348,6 +380,10 @@ class PlayerView extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
             ),
+            if (movie.isSeries)
+              Align(
+                  alignment: Alignment.centerRight,
+                  child: _buildNextEpisodeButton(context)),
           ],
         ),
       ),

@@ -67,7 +67,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
           title: watched.movie.title,
           imageUrl: watched.movie.imageUrl,
           url: watched.movie.url,
-          category: "Oglądane",
+          category: 'Oglądane',
         ));
       }
 

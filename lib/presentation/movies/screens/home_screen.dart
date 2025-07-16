@@ -36,9 +36,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _setupWatchedListener() {
     _watchedSubscription = _watchedService.watchedStream.listen((watchedList) {
-      debugPrint(
-          'HomeScreen: Watched list updated: ${watchedList.length} items');
-
       if (mounted) {
         context.read<MoviesBloc>().add(LoadMoviesRequested());
       }

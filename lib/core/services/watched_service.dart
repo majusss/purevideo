@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/models/watched_model.dart';
@@ -12,7 +13,12 @@ class WatchedService {
       _watchedController.stream;
 
   Future<void> init() async {
-    box = await Hive.openBox<WatchedMovieModel>('watched');
+    try {
+      box = await Hive.openBox<WatchedMovieModel>('watched');
+    } catch (e) {
+      await Hive.deleteBoxFromDisk('watched');
+      box = await Hive.openBox<WatchedMovieModel>('watched');
+    }
     _notifyListeners();
   }
 
@@ -50,6 +56,7 @@ class WatchedService {
 
   void watchEpisode(
     MovieDetailsModel movie,
+    SeasonModel season,
     EpisodeModel episode,
     int watchedTime,
   ) {
@@ -67,7 +74,8 @@ class WatchedService {
       watchedAt: DateTime.now(),
     );
 
-    watchedMovie.episodes!.add(watchedEpisode);
+    watchedMovie.episodes!.add(
+        WatchedSeasonEpisode(season: season, watchedEpisode: watchedEpisode));
 
     box.put(movie.url, watchedMovie);
     _notifyListeners();

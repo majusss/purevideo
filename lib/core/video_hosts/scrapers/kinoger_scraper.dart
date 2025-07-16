@@ -90,7 +90,7 @@ class KinoGerScraper extends VideoHostScraper {
 
   String _getBaseUrl(String url) {
     final uri = Uri.parse(url);
-    return "${uri.scheme}://${uri.host}/";
+    return '${uri.scheme}://${uri.host}/';
   }
 
   String _getUserAgent() {

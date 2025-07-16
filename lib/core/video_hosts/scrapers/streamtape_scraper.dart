@@ -37,7 +37,7 @@ class StreamtapeScraper extends VideoHostScraper {
       final String jsLine = jsLineMatch.group(0)!;
       final List<String> urls = RegExp(r"'([^']*)'")
           .allMatches(jsLine)
-          .map((m) => m.group(0)!.replaceAll("'", ""))
+          .map((m) => m.group(0)!.replaceAll("'", ''))
           .toList();
 
       if (urls.length != 2) {
@@ -46,7 +46,7 @@ class StreamtapeScraper extends VideoHostScraper {
 
       final String base = urls[0];
       final String encoded = urls[1];
-      final String fullUrl = "https:$base${encoded.substring(4)}";
+      final String fullUrl = 'https:$base${encoded.substring(4)}';
 
       final apiResponse = await _dio.get(
         fullUrl,
@@ -56,7 +56,7 @@ class StreamtapeScraper extends VideoHostScraper {
         ),
       );
 
-      final String? directLink = apiResponse.headers["location"]?.first;
+      final String? directLink = apiResponse.headers['location']?.first;
       if (directLink == null) {
         return null;
       }

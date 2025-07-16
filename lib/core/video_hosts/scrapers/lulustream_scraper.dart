@@ -8,7 +8,7 @@ class LuluStreamScraper extends VideoHostScraper {
   LuluStreamScraper(this._dio);
 
   @override
-  String get name => "LuluStream";
+  String get name => 'LuluStream';
 
   @override
   List<String> get domains => [
@@ -48,7 +48,7 @@ class LuluStreamScraper extends VideoHostScraper {
         },
       );
     } catch (e) {
-      debugPrint("Błąd podczas pobierania źródła z LuluStream($url): $e");
+      debugPrint('Błąd podczas pobierania źródła z LuluStream($url): $e');
       return null;
     }
   }

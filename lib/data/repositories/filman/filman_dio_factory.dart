@@ -21,18 +21,18 @@ class FilmanDioFactory {
         InterceptorsWrapper(
           onResponse: (response, handler) {
             if (response.headers.map['location']?.contains(
-                  "https://filman.cc/logowanie",
+                  'https://filman.cc/logowanie',
                 ) ==
                 true) {
               throw const UnauthorizedException();
             }
 
-            if (response.data.toString().contains("cf-wrapper")) {
+            if (response.data.toString().contains('cf-wrapper')) {
               final error =
-                  html.parse(response.data).querySelector(".code-label")?.text;
+                  html.parse(response.data).querySelector('.code-label')?.text;
               if (error != null) {
                 throw ServiceExeption(
-                    SupportedService.filman, "Cloudflare error: $error");
+                    SupportedService.filman, 'Cloudflare error: $error');
               }
               // idk maybe should throw blocked by cf exeption?
             }

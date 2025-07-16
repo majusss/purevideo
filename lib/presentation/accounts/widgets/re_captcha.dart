@@ -1,8 +1,8 @@
-import "dart:io";
+import 'dart:io';
 
-import "package:flutter/material.dart";
-import "package:flutter_inappwebview/flutter_inappwebview.dart";
-import "package:flutter_bloc/flutter_bloc.dart";
+import 'package:flutter/material.dart';
+import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GoogleReCaptcha extends StatefulWidget {
   final String siteKey;
@@ -14,7 +14,7 @@ class GoogleReCaptcha extends StatefulWidget {
     super.key,
     required this.siteKey,
     required this.url,
-    this.languageCode = "pl",
+    this.languageCode = 'pl',
     required this.onToken,
   });
 
@@ -157,7 +157,7 @@ class _GoogleReCaptchaView extends StatelessWidget {
       ),
       onWebViewCreated: (final InAppWebViewController controller) {
         controller.addJavaScriptHandler(
-          handlerName: "messageHandler",
+          handlerName: 'messageHandler',
           callback: (final message) {
             if (message[0] is String) {
               onToken(message[0]);
@@ -166,14 +166,14 @@ class _GoogleReCaptchaView extends StatelessWidget {
                 context: context,
                 builder: (final context) {
                   return AlertDialog(
-                    title: const Text("Błąd"),
+                    title: const Text('Błąd'),
                     content: const Text(
-                      "Wystąpił błąd podczas weryfikacji captcha.",
+                      'Wystąpił błąd podczas weryfikacji captcha.',
                     ),
                     actions: [
                       TextButton(
                         onPressed: () => Navigator.of(context).pop(),
-                        child: const Text("OK"),
+                        child: const Text('OK'),
                       ),
                     ],
                   );
@@ -197,7 +197,7 @@ class _GoogleReCaptchaView extends StatelessWidget {
           TextField(
             controller: textController,
             decoration: const InputDecoration(
-              labelText: "Captcha",
+              labelText: 'Captcha',
               border: OutlineInputBorder(),
             ),
           ),
@@ -206,7 +206,7 @@ class _GoogleReCaptchaView extends StatelessWidget {
             onPressed: () {
               onToken(textController.text);
             },
-            child: const Text("Zatwierdź"),
+            child: const Text('Zatwierdź'),
           ),
         ],
       ),

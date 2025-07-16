@@ -179,7 +179,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Emitter<PlayerState> emit,
   ) async {
     emit(state.copyWith(
-      displayState: "Przygotowywanie odtwarzacza...",
+      displayState: 'Przygotowywanie odtwarzacza...',
       isBuffering: true,
     ));
 
@@ -209,7 +209,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         isBuffering: false,
         isPlaying: true,
         selectedSource: event.source,
-        displayState: "",
+        displayState: '',
       ));
     } catch (e) {
       emit(state.copyWith(
@@ -359,6 +359,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       if (_movie!.isSeries) {
         watchedService.watchEpisode(
             _movie!,
+            _movie!.seasons![_seasonIndex!],
             _movie!.seasons![_seasonIndex!].episodes[_episodeIndex!],
             state.position.inSeconds);
       } else {

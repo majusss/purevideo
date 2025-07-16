@@ -13,6 +13,7 @@ void setupHiveAdapters() {
   Hive.registerAdapter(SeasonModelAdapter());
   Hive.registerAdapter(EpisodeModelAdapter());
   Hive.registerAdapter(HostLinkAdapter());
+  Hive.registerAdapter(WatchedSeasonEpisodeAdapter());
   Hive.registerAdapter(WatchedEpisodeModelAdapter());
   Hive.registerAdapter(WatchedMovieModelAdapter());
 }

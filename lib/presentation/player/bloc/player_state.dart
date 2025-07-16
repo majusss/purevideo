@@ -29,7 +29,7 @@ class PlayerState extends Equatable {
     this.videoSources,
     this.selectedSource,
     this.errorMessage,
-    this.displayState = "Ładowanie...",
+    this.displayState = 'Ładowanie...',
   });
 
   PlayerState copyWith({

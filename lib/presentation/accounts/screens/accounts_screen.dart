@@ -99,10 +99,10 @@ class AccountsScreen extends StatelessWidget {
                           title: Text(account.value.fields.entries
                               .firstWhere(
                                   (element) =>
-                                      element.key == "login" ||
-                                      element.key == "email",
+                                      element.key == 'login' ||
+                                      element.key == 'email',
                                   orElse: () =>
-                                      const MapEntry("login", "Unknown"))
+                                      const MapEntry('login', 'Unknown'))
                               .value),
                           subtitle: Text(account.key.displayName),
                           trailing: IconButton(

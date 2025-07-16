@@ -48,12 +48,6 @@ class EpisodeModel {
   @HiveField(4)
   final List<VideoSource>? directUrls;
 
-  late SeasonModel season;
-
-  void attachSeason(SeasonModel season) {
-    this.season = season;
-  }
-
   EpisodeModel(
       {required this.title,
       required this.number,
@@ -89,11 +83,7 @@ class SeasonModel {
   final List<EpisodeModel> episodes;
 
   SeasonModel(
-      {required this.name, required this.number, required this.episodes}) {
-    for (var episode in episodes) {
-      episode.attachSeason(this);
-    }
-  }
+      {required this.name, required this.number, required this.episodes});
 }
 
 @HiveType(typeId: 5)

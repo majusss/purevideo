@@ -47,7 +47,6 @@ class FilmanAuthRepository implements AuthRepository {
           );
           _account = null;
           _dio = FilmanDioFactory.getDio(null);
-          debugPrint(e.toString());
         }
       } else {
         _dio = FilmanDioFactory.getDio(null);
@@ -72,7 +71,7 @@ class FilmanAuthRepository implements AuthRepository {
     Map<String, String> fields,
   ) async {
     try {
-      fields["submit"] = "";
+      fields['submit'] = '';
 
       final response = await _dio.post(
         '/logowanie',
@@ -83,16 +82,16 @@ class FilmanAuthRepository implements AuthRepository {
       );
 
       final document = html.parse(response.data);
-      if (document.querySelector(".alert") != null) {
+      if (document.querySelector('.alert') != null) {
         final authModel = AuthModel(
           service: SupportedService.filman,
           success: false,
-          error: [document.querySelector(".alert")!.text],
+          error: [document.querySelector('.alert')!.text],
         );
         _authController.add(authModel);
         return authModel;
       }
-      final cookiesHeader = response.headers["set-cookie"];
+      final cookiesHeader = response.headers['set-cookie'];
       if (cookiesHeader != null) {
         _account = AccountModel(
           fields: fields,

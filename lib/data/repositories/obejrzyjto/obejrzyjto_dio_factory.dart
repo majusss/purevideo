@@ -20,12 +20,12 @@ class ObejrzyjtoDioFactory {
     )..interceptors.add(
         InterceptorsWrapper(
           onResponse: (response, handler) {
-            if (response.data.toString().contains("cf-wrapper")) {
+            if (response.data.toString().contains('cf-wrapper')) {
               final error =
-                  html.parse(response.data).querySelector(".code-label")?.text;
+                  html.parse(response.data).querySelector('.code-label')?.text;
               if (error != null) {
                 throw ServiceExeption(
-                    SupportedService.obejrzyjto, "Cloudflare error: $error");
+                    SupportedService.obejrzyjto, 'Cloudflare error: $error');
               }
               // idk maybe should throw blocked by cf exeption?
             }

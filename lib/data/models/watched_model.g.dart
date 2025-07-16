@@ -6,6 +6,43 @@ part of 'watched_model.dart';
 // TypeAdapterGenerator
 // **************************************************************************
 
+class WatchedSeasonEpisodeAdapter extends TypeAdapter<WatchedSeasonEpisode> {
+  @override
+  final int typeId = 11;
+
+  @override
+  WatchedSeasonEpisode read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return WatchedSeasonEpisode(
+      season: fields[0] as SeasonModel,
+      watchedEpisode: fields[1] as WatchedEpisodeModel,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, WatchedSeasonEpisode obj) {
+    writer
+      ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.season)
+      ..writeByte(1)
+      ..write(obj.watchedEpisode);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WatchedSeasonEpisodeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
 class WatchedEpisodeModelAdapter extends TypeAdapter<WatchedEpisodeModel> {
   @override
   final int typeId = 9;
@@ -60,7 +97,7 @@ class WatchedMovieModelAdapter extends TypeAdapter<WatchedMovieModel> {
       movie: fields[0] as MovieDetailsModel,
       watchedTime: fields[2] as int,
       watchedAt: fields[3] as DateTime,
-      episodes: (fields[1] as List?)?.cast<WatchedEpisodeModel>(),
+      episodes: (fields[1] as List?)?.cast<WatchedSeasonEpisode>(),
     );
   }
 

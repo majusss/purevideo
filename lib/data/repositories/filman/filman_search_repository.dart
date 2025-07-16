@@ -35,8 +35,8 @@ class FilmanSearchRepository implements SearchRepository {
     await _prepareDio();
 
     final response = await _dio!.get(
-      "/item",
-      queryParameters: {"phrase": query},
+      '/item',
+      queryParameters: {'phrase': query},
     );
 
     final document = html.parse(response.data);
@@ -44,15 +44,15 @@ class FilmanSearchRepository implements SearchRepository {
     final movies = <MovieModel>[];
 
     document
-        .querySelectorAll(".col-xs-6.col-sm-3.col-lg-2")
+        .querySelectorAll('.col-xs-6.col-sm-3.col-lg-2')
         .forEach((final filmDOM) {
-      final poster = filmDOM.querySelector(".poster");
+      final poster = filmDOM.querySelector('.poster');
       final title =
-          filmDOM.querySelector(".film_title")?.text.trim() ?? "Brak danych";
+          filmDOM.querySelector('.film_title')?.text.trim() ?? 'Brak danych';
       final imageUrl =
-          poster?.querySelector("img")?.attributes["src"]?.trim() ?? "";
+          poster?.querySelector('img')?.attributes['src']?.trim() ?? '';
       final link =
-          poster?.querySelector("a")?.attributes["href"] ?? "Brak danych";
+          poster?.querySelector('a')?.attributes['href'] ?? 'Brak danych';
 
       if (title.isEmpty || imageUrl.isEmpty == true || link.isEmpty) return;
       movies.add(MovieModel(

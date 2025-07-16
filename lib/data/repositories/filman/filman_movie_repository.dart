@@ -40,23 +40,23 @@ class FilmanMovieRepository implements MovieRepository {
   List<HostLink> _extractHostLinksFromDocument(dom.Document document) {
     final videoUrls = <HostLink>[];
 
-    for (final row in document.querySelectorAll("tbody tr")) {
+    for (final row in document.querySelectorAll('tbody tr')) {
       String? link;
 
       try {
         final decoded = base64Decode(
-            row.querySelector("td a")?.attributes["data-iframe"] ?? "");
-        link = (jsonDecode(utf8.decode(decoded))["src"] as String)
-            .split("/")
+            row.querySelector('td a')?.attributes['data-iframe'] ?? '');
+        link = (jsonDecode(utf8.decode(decoded))['src'] as String)
+            .split('/')
             .take(7)
-            .join("/");
+            .join('/');
       } catch (_) {
         link = null;
       }
 
       if (link == null || link.isEmpty == true) continue;
 
-      final tableData = row.querySelectorAll("td");
+      final tableData = row.querySelectorAll('td');
       if (tableData.length < 3) continue;
       final language = tableData[1].text.trim();
       final qualityVersion = tableData[2].text.trim();
@@ -80,23 +80,23 @@ class FilmanMovieRepository implements MovieRepository {
 
     final movies = <MovieModel>[];
 
-    for (final list in document.querySelectorAll("div[id=item-list]")) {
+    for (final list in document.querySelectorAll('div[id=item-list]')) {
       for (final item in list.children) {
-        final poster = item.querySelector(".poster");
+        final poster = item.querySelector('.poster');
         final title = poster
-                ?.querySelector("a")
-                ?.attributes["title"]
+                ?.querySelector('a')
+                ?.attributes['title']
                 ?.trim()
-                .split("/")
+                .split('/')
                 .first
                 .trim() ??
-            "Brak danych";
-        final imageUrl = poster?.querySelector("img")?.attributes["src"] ??
-            "https://placehold.co/250x370/png?font=roboto&text=?";
+            'Brak danych';
+        final imageUrl = poster?.querySelector('img')?.attributes['src'] ??
+            'https://placehold.co/250x370/png?font=roboto&text=?';
         final link =
-            poster?.querySelector("a")?.attributes["href"] ?? "Brak danych";
+            poster?.querySelector('a')?.attributes['href'] ?? 'Brak danych';
         final category =
-            list.parent?.querySelector("h3")?.text.trim() ?? "INNE";
+            list.parent?.querySelector('h3')?.text.trim() ?? 'INNE';
 
         final movie = MovieModel(
           service: SupportedService.filman,
