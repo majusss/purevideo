@@ -118,9 +118,10 @@ class _NavBarItem extends StatelessWidget {
         child: InkWell(
           onTap: onTap,
           customBorder: const CircleBorder(),
-          splashColor: Theme.of(context).colorScheme.primary.withOpacity(0.05),
+          splashColor:
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.05),
           highlightColor:
-              Theme.of(context).colorScheme.primary.withOpacity(0.2),
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.2),
           child: SizedBox(
             width: 64,
             child: Column(

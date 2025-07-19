@@ -21,14 +21,6 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
     on<UpdateWatchedStatus>(_onUpdateWatchedStatus);
   }
 
-  @override
-  Future<void> close() {
-    _stopScraping();
-    return super.close();
-  }
-
-  void _stopScraping() {}
-
   Future<void> _onLoadMovieDetails(
       LoadMovieDetails event, Emitter<MovieDetailsState> emit) async {
     try {
@@ -47,14 +39,14 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
       emit(state.copyWith(watched: watched));
 
       if (movie.isSeries) {
-        // final lastWatchedSeason = watched?.lastWatchedEpisode?.$1;
-        // final selectedSeasonIndex = lastWatchedSeason != null
-        //     ? movie.seasons
-        //         ?.indexWhere((s) => s.number == lastWatchedSeason.number)
-        //     : 0;
+        final lastWatchedSeason = watched?.lastWatchedEpisode?.season;
+        final selectedSeasonIndex = lastWatchedSeason != null
+            ? movie.seasons
+                ?.indexWhere((s) => s.number == lastWatchedSeason.number)
+            : 0;
         emit(state.copyWith(
           movie: movie,
-          //   selectedSeasonIndex: selectedSeasonIndex,
+          selectedSeasonIndex: selectedSeasonIndex,
         ));
       } else {
         emit(state.copyWith(movie: movie));

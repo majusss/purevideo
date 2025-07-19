@@ -136,5 +136,5 @@ void main() async {
   debugPrint("movie details added to box");
   MovieDetailsModel? details = detailsBox.getAt(0);
   debugPrint(
-      "movie details retrieved from box: ${details?.title} - ${details?.year} - ${details?.genres} - ${details?.countries} - ${details?.isSeries} - ${details?.imageUrl} - ${details?.description} - ${details?.url}");
+      "movie details recieved from box: ${details?.title} - ${details?.year} - ${details?.genres} - ${details?.countries} - ${details?.isSeries} - ${details?.imageUrl} - ${details?.description} - ${details?.url}");
 }

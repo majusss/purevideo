@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/presentation/settings/screens/about_screen.dart';
 import 'package:purevideo/presentation/global/screens/main_screen.dart';
@@ -82,6 +83,7 @@ final router = GoRouter(
         final int? episodeIndex = (state.uri.queryParameters['episode'] != null)
             ? int.tryParse(state.uri.queryParameters['episode']!)
             : null;
+
         return NoTransitionPage(
           child: PlayerScreen(
             movie: movie,

@@ -151,6 +151,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
       if (movieDetails.directUrls != null &&
           movieDetails.directUrls!.isNotEmpty) {
+        // TODO: lepsze wybieranie i sprawdzanie źródeł
         final selectedSource = movieDetails.directUrls!.first;
 
         emit(state.copyWith(

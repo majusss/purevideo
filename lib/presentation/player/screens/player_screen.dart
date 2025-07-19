@@ -43,6 +43,11 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+  }
+
+  @override
   void dispose() {
     _playerBloc.add(const DisposePlayer());
     SystemChrome.setPreferredOrientations([
@@ -274,21 +279,21 @@ class PlayerView extends StatelessWidget {
     final nextEpisodeIndex = episodeIndex + 1;
     if (nextEpisodeIndex < movie.seasons![seasonIndex].episodes.length) {
       queryParameters = {
-        'seasonIndex': seasonIndex,
-        'episodeIndex': nextEpisodeIndex,
+        'season': seasonIndex.toString(),
+        'episode': nextEpisodeIndex.toString(),
       };
     } else if (seasonIndex + 1 < movie.seasons!.length) {
       queryParameters = {
-        'seasonIndex': seasonIndex + 1,
-        'episodeIndex': 0,
+        'season': (seasonIndex + 1).toString(),
+        'episode': '0',
       };
     } else {
       return const SizedBox.shrink();
     }
 
     return OutlinedButton.icon(
-      onPressed: () {
-        context.replaceNamed('player',
+      onPressed: () async {
+        context.pushNamed('player',
             extra: movie, queryParameters: queryParameters);
       },
       icon: const Text('Następny odcinek'),
