@@ -1,4 +1,4 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/presentation/settings/screens/about_screen.dart';
 import 'package:purevideo/presentation/global/screens/main_screen.dart';
@@ -15,9 +15,8 @@ import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/presentation/settings/screens/theme_screen.dart';
 
-final router = GoRouter(
+final GoRouter router = GoRouter(
   initialLocation: '/',
-  debugLogDiagnostics: true,
   routes: [
     GoRoute(
       path: '/login/:service',
@@ -86,6 +85,9 @@ final router = GoRouter(
 
         return NoTransitionPage(
           child: PlayerScreen(
+            key: ValueKey(
+              '${movie.url}-${seasonIndex ?? 0}-${episodeIndex ?? 0}',
+            ),
             movie: movie,
             seasonIndex: seasonIndex,
             episodeIndex: episodeIndex,

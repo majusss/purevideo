@@ -124,6 +124,10 @@ class FilmanMovieRepository implements MovieRepository {
     return hostLinks;
   }
 
+  String _prepareTitle(String title) {
+    return title.contains('/') ? title.split('/').first.trim() : title.trim();
+  }
+
   @override
   Future<MovieDetailsModel> getMovieDetails(String url) async {
     await _prepareDio();
@@ -131,9 +135,10 @@ class FilmanMovieRepository implements MovieRepository {
     final response = await _dio!.get(url);
     final document = html.parse(response.data);
 
-    final title = document.querySelector('[itemprop="title"]')?.text.trim() ??
-        document.querySelector('h2')?.text.trim() ??
-        'Brak tytułu';
+    final title = _prepareTitle(
+        document.querySelector('[itemprop="title"]')?.text.trim() ??
+            document.querySelector('h2')?.text.trim() ??
+            'Brak tytułu');
     final description =
         document.querySelector('.description')?.text.trim() ?? '';
     final imageUrl =

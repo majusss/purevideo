@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:media_kit_video/media_kit_video.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/movie_model.dart';
-import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/global/widgets/error_view.dart';
 import 'package:purevideo/presentation/player/bloc/player_bloc.dart';
 import 'package:purevideo/presentation/player/bloc/player_event.dart';
@@ -33,8 +32,8 @@ class _PlayerScreenState extends State<PlayerScreen> {
 
   @override
   void initState() {
+    _playerBloc = PlayerBloc();
     super.initState();
-    _playerBloc = getIt<PlayerBloc>();
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
@@ -43,18 +42,18 @@ class _PlayerScreenState extends State<PlayerScreen> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-  }
-
-  @override
-  void dispose() {
-    _playerBloc.add(const DisposePlayer());
+  void deactivate() {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.portraitUp,
       DeviceOrientation.portraitDown,
     ]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    super.deactivate();
+  }
+
+  @override
+  void dispose() {
+    _playerBloc.add(const DisposePlayer());
     super.dispose();
   }
 
@@ -293,7 +292,8 @@ class PlayerView extends StatelessWidget {
 
     return OutlinedButton.icon(
       onPressed: () async {
-        context.pushNamed('player',
+        // disable screen rotation in deactivate method
+        context.pushReplacementNamed('player',
             extra: movie, queryParameters: queryParameters);
       },
       icon: const Text('Następny odcinek'),

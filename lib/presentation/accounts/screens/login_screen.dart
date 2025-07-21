@@ -46,43 +46,47 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Logowanie do ${widget.service.displayName}')),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              ..._buildFormFields(),
-              const SizedBox(height: 24),
-              FilledButton(
-                onPressed: _handleSubmit,
-                child: const Text('Zaloguj'),
+    return BlocProvider(
+        create: (_) =>
+            context.read<AccountsBloc>()..add(const LoadAccountsRequested()),
+        child: Scaffold(
+          appBar:
+              AppBar(title: Text('Logowanie do ${widget.service.displayName}')),
+          body: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ..._buildFormFields(),
+                  const SizedBox(height: 24),
+                  FilledButton(
+                    onPressed: _handleSubmit,
+                    child: const Text('Zaloguj'),
+                  ),
+                  if (widget.service.canBeAnonymous) ...[
+                    const SizedBox(height: 16),
+                    OutlinedButton(
+                      onPressed: () {
+                        context.read<AccountsBloc>().add(
+                              SignInRequested(
+                                service: widget.service,
+                                fields: {'anonymous': 'true'},
+                              ),
+                            );
+                        if (context.canPop()) {
+                          context.pop();
+                        }
+                      },
+                      child: const Text('Zaloguj jako gość'),
+                    ),
+                  ]
+                ],
               ),
-              if (widget.service.canBeAnonymous) ...[
-                const SizedBox(height: 16),
-                OutlinedButton(
-                  onPressed: () {
-                    context.read<AccountsBloc>().add(
-                          SignInRequested(
-                            service: widget.service,
-                            fields: {'anonymous': 'true'},
-                          ),
-                        );
-                    if (context.canPop()) {
-                      context.pop();
-                    }
-                  },
-                  child: const Text('Zaloguj jako gość'),
-                ),
-              ]
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
   List<Widget> _buildFormFields() {

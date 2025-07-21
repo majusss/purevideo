@@ -4,8 +4,6 @@ import 'package:purevideo/core/services/settings_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_bloc.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_event.dart';
-import 'package:purevideo/presentation/movies/bloc/movies_bloc.dart';
-import 'package:purevideo/presentation/movies/bloc/movies_event.dart';
 import 'package:purevideo/presentation/global/routes/router.dart';
 import 'package:purevideo/presentation/settings/widgets/settings_listenable.dart';
 
@@ -37,10 +35,7 @@ class PureVideoApp extends StatelessWidget {
             providers: [
               BlocProvider(
                 create: (_) =>
-                    getIt<AccountsBloc>()..add(const LoadAccountsRequested()),
-              ),
-              BlocProvider(
-                create: (_) => getIt<MoviesBloc>()..add(LoadMoviesRequested()),
+                    AccountsBloc()..add(const LoadAccountsRequested()),
               ),
             ],
             child: child!,

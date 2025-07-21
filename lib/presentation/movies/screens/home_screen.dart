@@ -24,7 +24,6 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    context.read<MoviesBloc>().add(LoadMoviesRequested());
     _setupWatchedListener();
   }
 
@@ -44,51 +43,54 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<MoviesBloc, MoviesState>(
-        builder: (context, state) {
-          if (state is MoviesLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is MoviesError) {
-            return ErrorView(
-              message: state.message,
-              onRetry: () {
-                context.read<MoviesBloc>().add(LoadMoviesRequested());
-              },
-            );
-          }
-          if (state is MoviesLoaded) {
-            if (state.movies.isEmpty) {
-              return const Center(child: Text('Brak dostępnych filmów'));
+    return BlocProvider(
+      create: (_) => MoviesBloc()..add(LoadMoviesRequested()),
+      child: Scaffold(
+        body: BlocBuilder<MoviesBloc, MoviesState>(
+          builder: (context, state) {
+            if (state is MoviesLoading) {
+              return const Center(child: CircularProgressIndicator());
             }
-
-            final moviesByCategory = <String, List<MovieModel>>{};
-            for (final movie in state.movies) {
-              final category = movie.category ?? 'INNE';
-              moviesByCategory.putIfAbsent(category, () => []).add(movie);
+            if (state is MoviesError) {
+              return ErrorView(
+                message: state.message,
+                onRetry: () {
+                  context.read<MoviesBloc>().add(LoadMoviesRequested());
+                },
+              );
             }
+            if (state is MoviesLoaded) {
+              if (state.movies.isEmpty) {
+                return const Center(child: Text('Brak dostępnych filmów'));
+              }
 
-            return RefreshIndicator(
-              onRefresh: () async =>
-                  context.read<MoviesBloc>().add(LoadMoviesRequested()),
-              child: ListView(
-                padding: EdgeInsets.only(
-                  top: 8,
-                  bottom: MediaQuery.of(context).padding.bottom + 16,
+              final moviesByCategory = <String, List<MovieModel>>{};
+              for (final movie in state.movies) {
+                final category = movie.category ?? 'INNE';
+                moviesByCategory.putIfAbsent(category, () => []).add(movie);
+              }
+
+              return RefreshIndicator(
+                onRefresh: () async =>
+                    context.read<MoviesBloc>().add(LoadMoviesRequested()),
+                child: ListView(
+                  padding: EdgeInsets.only(
+                    top: 8,
+                    bottom: MediaQuery.of(context).padding.bottom + 16,
+                  ),
+                  children: moviesByCategory.entries
+                      .where((entry) => entry.value.isNotEmpty)
+                      .map(
+                        (entry) =>
+                            MovieRow(title: entry.key, movies: entry.value),
+                      )
+                      .toList(),
                 ),
-                children: moviesByCategory.entries
-                    .where((entry) => entry.value.isNotEmpty)
-                    .map(
-                      (entry) =>
-                          MovieRow(title: entry.key, movies: entry.value),
-                    )
-                    .toList(),
-              ),
-            );
-          }
-          return const SizedBox.shrink();
-        },
+              );
+            }
+            return const SizedBox.shrink();
+          },
+        ),
       ),
     );
   }

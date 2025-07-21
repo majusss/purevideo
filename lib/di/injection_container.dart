@@ -14,10 +14,6 @@ import 'package:purevideo/data/repositories/filman/filman_auth_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_movie_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/di/video_hosts_container.dart';
-import 'package:purevideo/presentation/accounts/bloc/accounts_bloc.dart';
-import 'package:purevideo/presentation/movie_details/bloc/movie_details_bloc.dart';
-import 'package:purevideo/presentation/movies/bloc/movies_bloc.dart';
-import 'package:purevideo/presentation/player/bloc/player_bloc.dart';
 import 'package:purevideo/presentation/accounts/widgets/re_captcha.dart';
 
 final getIt = GetIt.instance;
@@ -46,9 +42,4 @@ void setupInjection() {
     SupportedService.filman: FilmanSearchRepository(),
     SupportedService.obejrzyjto: ObejrzyjtoSearchRepository(),
   });
-
-  getIt.registerFactory<AccountsBloc>(() => AccountsBloc());
-  getIt.registerFactory<MoviesBloc>(() => MoviesBloc());
-  getIt.registerFactory<MovieDetailsBloc>(() => MovieDetailsBloc());
-  getIt.registerFactory<PlayerBloc>(() => PlayerBloc());
 }

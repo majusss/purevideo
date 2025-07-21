@@ -24,7 +24,7 @@ class MovieDetailsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => getIt<MovieDetailsBloc>()
+      create: (context) => MovieDetailsBloc()
         ..add(
           LoadMovieDetails(service: service, url: url),
         ),
