@@ -3,6 +3,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/core/services/settings_service.dart';
 import 'package:purevideo/di/injection_container.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutScreen extends StatefulWidget {
   const AboutScreen({super.key});
@@ -127,6 +128,10 @@ class _AboutScreenState extends State<AboutScreen> {
               const SizedBox(height: 32),
               _buildInfoSection(context),
               const SizedBox(height: 24),
+              _buildLicenseSection(context),
+              const SizedBox(height: 24),
+              _buildSocialSection(context),
+              const SizedBox(height: 24),
               _buildCreatorsSection(context),
               const SizedBox(height: 24),
               Text(
@@ -170,6 +175,163 @@ class _AboutScreenState extends State<AboutScreen> {
             const SizedBox(height: 8),
             Text(
               'Aplikacja agreguje treści z różnych źródeł internetowych, zapewniając bogaty wybór filmów i seriali w jednym miejscu.',
+              style: textTheme.bodyMedium,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Społeczność',
+              style: textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'Dołącz do naszej społeczności i wspieraj projekt.',
+              style: textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildSocialIcon(
+                  context,
+                  Icons.discord,
+                  'Discord',
+                  () async {
+                    if (!await launchUrl(
+                        Uri.parse('https://discord.gg/vjtkqAMQdn'))) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Nie można otworzyć Discorda'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                _buildSocialIcon(
+                  context,
+                  Icons.code,
+                  'GitHub',
+                  () async {
+                    if (!await launchUrl(
+                        Uri.parse('https://github.com/majusss/purevideo'))) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Nie można otworzyć GitHuba'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+                _buildSocialIcon(
+                  context,
+                  Icons.coffee,
+                  'Buy Me a Coffee',
+                  () async {
+                    if (!await launchUrl(
+                        Uri.parse('https://www.buymeacoffee.com/majusss'))) {
+                      if (!context.mounted) return;
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Nie można otworzyć Buy Me a Coffee'),
+                        ),
+                      );
+                    }
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialIcon(
+      BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 56,
+            height: 56,
+            decoration: BoxDecoration(
+              color: colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(28),
+              border: Border.all(
+                color: colorScheme.primary.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              icon,
+              color: colorScheme.primary,
+              size: 28,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: textTheme.bodySmall?.copyWith(
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLicenseSection(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Card(
+      elevation: 0,
+      color: colorScheme.surfaceContainerHighest,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Licencja',
+              style: textTheme.titleLarge,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              'PureVideo jest aplikacją open source udostępnioną na licencji GPL v3 (GNU General Public License version 3).',
+              style: textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Kod źródłowy jest dostępny na GitHub. Możesz używać, modyfikować i rozpowszechniać tę aplikację zgodnie z warunkami licencji GPL v3.',
               style: textTheme.bodyMedium,
             ),
           ],

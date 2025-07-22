@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
@@ -61,15 +62,19 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
         emit(const MoviesError('Zaloguj się aby zobaczyć filmy'));
         return;
       }
-      for (final watched in _watchedService.getAll()) {
-        _movies.add(MovieModel(
-          service: watched.movie.service,
-          title: watched.movie.title,
-          imageUrl: watched.movie.imageUrl,
-          url: watched.movie.url,
-          category: 'Oglądane',
-        ));
-      }
+
+      _movies.addAll(_watchedService
+          .getAll()
+          .sorted(
+            (a, b) => a.watchedAt.compareTo(b.watchedAt),
+          )
+          .map((watched) => MovieModel(
+                service: watched.movie.service,
+                title: watched.movie.title,
+                imageUrl: watched.movie.imageUrl,
+                url: watched.movie.url,
+                category: 'Oglądane',
+              )));
 
       for (final entry in _repositories.entries) {
         final service = entry.key;
