@@ -81,6 +81,20 @@ class WatchedMovieModel {
       required this.watchedAt,
       this.episodes});
 
+  WatchedMovieModel copyWith({
+    MovieDetailsModel? movie,
+    List<WatchedSeasonEpisode>? episodes,
+    int? watchedTime,
+    DateTime? watchedAt,
+  }) {
+    return WatchedMovieModel(
+      movie: movie ?? this.movie,
+      episodes: episodes ?? this.episodes,
+      watchedTime: watchedTime ?? this.watchedTime,
+      watchedAt: watchedAt ?? this.watchedAt,
+    );
+  }
+
   WatchedEpisodeModel? getEpisodeByUrl(String url) {
     return episodes
         ?.firstWhereOrNull(

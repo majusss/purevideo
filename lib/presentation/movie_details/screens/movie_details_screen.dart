@@ -264,7 +264,11 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
             extra: movie,
             queryParameters: {
               'season': state.selectedSeasonIndex.toString(),
-              'episode': '0',
+              'episode': ((state.watched?.lastWatchedEpisode?.watchedEpisode
+                              .episode.number ??
+                          1) -
+                      1)
+                  .toString(),
             },
           );
         } else {

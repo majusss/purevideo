@@ -59,7 +59,9 @@ class WatchedService {
     EpisodeModel episode,
     int watchedTime,
   ) {
-    var watchedMovie = box.get(movie.url) ??
+    var watchedMovie = box.get(movie.url)?.copyWith(
+              watchedAt: DateTime.now(),
+            ) ??
         WatchedMovieModel(
           movie: movie,
           watchedTime: 0,

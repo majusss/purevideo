@@ -44,6 +44,7 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
             ? movie.seasons
                 ?.indexWhere((s) => s.number == lastWatchedSeason.number)
             : 0;
+
         emit(state.copyWith(
           movie: movie,
           selectedSeasonIndex: selectedSeasonIndex,

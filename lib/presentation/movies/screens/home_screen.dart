@@ -20,10 +20,12 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   final WatchedService _watchedService = getIt<WatchedService>();
   StreamSubscription? _watchedSubscription;
+  late MoviesBloc _moviesBloc;
 
   @override
   void initState() {
     super.initState();
+    _moviesBloc = MoviesBloc();
     _setupWatchedListener();
   }
 
@@ -36,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void _setupWatchedListener() {
     _watchedSubscription = _watchedService.watchedStream.listen((watchedList) {
       if (mounted) {
-        context.read<MoviesBloc>().add(LoadMoviesRequested());
+        _moviesBloc.add(LoadMoviesRequested());
       }
     });
   }
@@ -44,7 +46,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => MoviesBloc()..add(LoadMoviesRequested()),
+      create: (_) => _moviesBloc..add(LoadMoviesRequested()),
       child: Scaffold(
         body: BlocBuilder<MoviesBloc, MoviesState>(
           builder: (context, state) {
