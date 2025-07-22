@@ -46,10 +46,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-        create: (_) =>
-            context.read<AccountsBloc>()..add(const LoadAccountsRequested()),
-        child: Scaffold(
+    return Scaffold(
           appBar:
               AppBar(title: Text('Logowanie do ${widget.service.displayName}')),
           body: Padding(
@@ -86,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
             ),
           ),
-        ));
+        );
   }
 
   List<Widget> _buildFormFields() {

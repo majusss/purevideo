@@ -1,8 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:purevideo/core/error/exceptions.dart';
-import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
-import 'package:html/parser.dart' as html;
 
 class FilmanDioFactory {
   static Dio getDio([AccountModel? account]) {
@@ -26,17 +24,6 @@ class FilmanDioFactory {
                 true) {
               throw const UnauthorizedException();
             }
-
-            if (response.data.toString().contains('cf-wrapper')) {
-              final error =
-                  html.parse(response.data).querySelector('.code-label')?.text;
-              if (error != null) {
-                throw ServiceExeption(
-                    SupportedService.filman, 'Cloudflare error: $error');
-              }
-              // idk maybe should throw blocked by cf exeption?
-            }
-
             return handler.next(response);
           },
         ),
