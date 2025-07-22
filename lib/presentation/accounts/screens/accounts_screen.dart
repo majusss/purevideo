@@ -21,51 +21,34 @@ class AccountsScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              GridView.builder(
+              ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 200,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 1.2,
-                ),
                 itemCount: SupportedService.values.length,
                 itemBuilder: (context, index) {
                   final service = SupportedService.values[index];
-                  return GestureDetector(
-                    onTap: () => context.pushNamed(
-                      'login',
-                      pathParameters: {'service': service.toString()},
-                    ),
-                    child: Card(
-                      child: Padding(
-                        padding: const EdgeInsets.all(12),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(
-                              height: 48,
-                              child: Center(
-                                child: FastCachedImage(url: service.image),
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Text(
-                              service.displayName,
-                              textAlign: TextAlign.center,
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: GestureDetector(
+                      onTap: () => context.pushNamed(
+                        'login',
+                        pathParameters: {'service': service.toString()},
+                      ),
+                      child: Card(
+                        child: ListTile(
+                          leading: SizedBox(
+                            width: 32,
+                            height: 32,
+                            child: FastCachedImage(url: service.image),
+                          ),
+                          title: Text(service.displayName),
+                          trailing: const Icon(Icons.login),
                         ),
                       ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 16),
               BlocBuilder<AccountsBloc, AccountsState>(
                 builder: (context, state) {
                   if (state is AccountsLoading) {

@@ -1,91 +1,47 @@
-[![Build Status](https://app.bitrise.io/app/ad1d5670-9333-4ebe-af79-7113a7b0aa20/status.svg?token=6jv9x_7aMeUeZMO5L_pPTg&branch=master)](https://app.bitrise.io/app/ad1d5670-9333-4ebe-af79-7113a7b0aa20) [![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/vjtkqAMQdn)](https://discord.gg/vjtkqAMQdn)
+# PureVideo
 
-# PureVideo - Aplikacja Streamingowa we Flutterze
+[![wakatime](https://wakatime.com/badge/user/63d00a78-aaef-4163-98f0-5695127e3103/project/217fcaa6-ea6b-4a0b-8ef1-68a43f879a6c.svg?style=for-the-badge)](https://wakatime.com/badge/user/63d00a78-aaef-4163-98f0-5695127e3103/project/217fcaa6-ea6b-4a0b-8ef1-68a43f879a6c)
+[![Discord](https://dcbadge.limes.pink/api/server/https://discord.gg/vjtkqAMQdn)](https://discord.gg/vjtkqAMQdn) [![Build Status](https://app.bitrise.io/app/ad1d5670-9333-4ebe-af79-7113a7b0aa20/status.svg?token=6jv9x_7aMeUeZMO5L_pPTg&branch=master)](https://app.bitrise.io/app/ad1d5670-9333-4ebe-af79-7113a7b0aa20)
 
-PureVideo to wieloplatformowa aplikacja mobilna do streamingu filmów i seriali, zbudowana przy użyciu frameworka Flutter. Projekt zakłada pozyskiwanie treści z różnych źródeł internetowych poprzez mechanizmy scrapowania, co pozwala na agregację bogatej biblioteki mediów z rozproszonych zasobów.
+## Opis
 
-## Założenia projektu
+**PureVideo** to wieloplatformowa aplikacja mobilna do streamingu filmów i seriali, zbudowana w oparciu o Flutter. Agreguje treści z różnych serwisów internetowych, umożliwiając wygodne przeglądanie, oglądanie oraz śledzenie postępów oglądania.
 
-Głównym celem projektu jest stworzenie kompleksowej aplikacji streamingowej, która będzie:
+## Najważniejsze funkcje
 
-- Umożliwiać użytkownikom dostęp do filmów i seriali z różnych źródeł w jednym miejscu
-- Zapewniać wysoką jakość odtwarzania treści multimedialnych
-- Oferować intuicyjny i responsywny interfejs użytkownika
-- Działać na platformach Android i iOS
-- Efektywnie zarządzać zasobami urządzenia (pamięć, dane mobilne)
+- 🎬 Integracja z wieloma źródłami filmów i seriali (filman.cc, obejrzyj.to)
+- 👤 Obsługa kont użytkowników z bezpieczną autoryzacją
+- ▶️ Zaawansowany odtwarzacz wideo z zapamiętywaniem postępu oglądania
+- 📊 System śledzenia obejrzanych materiałów (filmy i odcinki)
+- 🖼️ Optymalizacja obrazów z szybkim cache'owaniem
+- 📈 Integracja z Firebase Analytics i Crashlytics
+- 🎨 Nowoczesny interfejs oparty o Material Design 3
+- 🌙 Tryb ciemny i jasny z automatyczną detekcją systemu
+- 🔍 Wyszukiwanie filmów i seriali
+- 🚀 Aktualizacje na żywo bez instalowania nowych wersji (Shorebird)
 
-## Stos technologiczny
+## Architektura
 
-### Podstawy:
+### Technologie główne
 
-- **Flutter** - jako framework do tworzenia wieloplatformowej aplikacji
-- **Dart** - język programowania
-- **Clean Architecture** - jako wzorzec architektoniczny
+- **Flutter** – framework aplikacji mobilnej (Android/iOS/Web)
+- **BLoC Pattern** – zaawansowane zarządzanie stanem aplikacji
+- **GetIt** – dependency injection container
+- **Go Router** – nawigacja między ekranami
+- **Shorebird** – aktualizacje na żywo bez przeinstalowywania aplikacji
 
-### Kluczowe biblioteki:
+### Bazy danych i storage
 
-- **Dio** - zaawansowany klient HTTP do komunikacji z różnymi źródłami treści i scrapowania danych
-- **CachedNetworkImage** - biblioteka do efektywnego zarządzania i cachowania obrazów
-- **MediaKit** - kompleksowy framework do odtwarzania materiałów wideo z akcelereacją sprzętową
-- **flutter_bloc/bloc** - do zarządzania stanem aplikacji
-- **Hive** - nowoczesna baza danych NoSQL do przechowywania danych lokalnie
-- **get_it** - do wstrzykiwania zależności
-- **go_router** - do zaawansowanej nawigacji i zarządzania routingiem
+- **Hive** – szybka, lokalna baza danych NoSQL do przechowywania obejrzanych materiałów
+- **Flutter Secure Storage** – bezpieczne przechowywanie danych uwierzytelniania
 
-### Dodatkowe narzędzia:
+### Multimedia i sieć
 
-- **html** - do scrapowania treści z różnych stron internetowych
+- **MediaKit** – profesjonalny, wydajny odtwarzacz wideo z obsługą wielu formatów i protokołów streamingowych
+- **Dio** – zaawansowany klient HTTP z interceptorami
+- **FastCachedNetworkImage** – optymalizowane ładowanie i cachowanie obrazów
 
-## Struktura projektu
+### Monitoring i analityka
 
-Projekt będzie zorganizowany zgodnie z zasadami Clean Architecture:
-
-## Kluczowe funkcjonalności
-
-### 1. Ekran główny
-
-- Sekcje z rekomendowanymi filmami i serialami
-- Kategorie treści (filmy, seriale, dokumenty)
-- Karuzele z różnymi typami treści (popularne, nowe, trendy)
-
-### 2. Wyszukiwanie i filtrowanie
-
-- Globalne wyszukiwanie treści po tytule, gatunku, aktorach
-- Filtry treści (rok produkcji, gatunek, oceny)
-- Historia wyszukiwania
-
-### 3. Szczegóły treści
-
-- Pełne informacje o filmie/serialu
-- Galeria zdjęć
-- Obsada i twórcy
-- Podobne treści
-- Oceny i możliwość dodania do listy "Do obejrzenia"
-
-### 4. Odtwarzacz
-
-- Płynne odtwarzanie wideo w różnych rozdzielczościach
-- Kontrola odtwarzania (pauza, przewijanie, głośność)
-- Automatyczna adaptacja jakości do łącza internetowego
-- Tryb pełnoekranowy i Picture-in-Picture
-
-### 5. Zarządzanie treściami
-
-- Lista "Do obejrzenia"
-- Historia oglądania
-- Ulubione treści
-- Automatyczne wznawianie odtwarzania
-
-### 6. Ustawienia
-
-- Preferencje jakości odtwarzania
-- Zarządzanie cache'em
-- Wybór preferowanych źródeł treści
-- Personalizacja interfejsu
-
-## Mechanizm scrapowania
-
-Aplikacja będzie wykorzystywać proste techniki scrapowania treści:
-
-- **Statyczne scrapowanie** - wykorzystując Dio i HTML parser do efektywnego pozyskiwania treści
-- **Mechanizm cache'owania** - aby zminimalizować liczbę zapytań do źródeł
+- **Firebase Analytics** – analityka użytkowania
+- **Firebase Crashlytics** – automatyczne raportowanie błędów
