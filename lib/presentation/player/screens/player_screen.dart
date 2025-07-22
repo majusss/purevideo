@@ -147,7 +147,7 @@ class PlayerView extends StatelessWidget {
           Video(
             controller: bloc.controller,
             controls: NoVideoControls,
-            fit: BoxFit.cover,
+            fit: state.isImersive ? BoxFit.cover : BoxFit.contain,
           ),
           SafeArea(child: _buildOverlay(context, state)),
         ],
@@ -438,6 +438,13 @@ class PlayerView extends StatelessWidget {
                     )
                     .toList(),
               ),
+            IconButton(
+                icon: Icon(
+                    state.isImersive ? Icons.fullscreen_exit : Icons.fullscreen,
+                    color: Colors.white),
+                onPressed: () {
+                  bloc.add(const ToggleImmersiveMode());
+                })
           ],
         ),
       ),

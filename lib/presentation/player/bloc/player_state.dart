@@ -9,6 +9,7 @@ class PlayerState extends Equatable {
   final bool isBuffering;
   final bool isOverlayVisible;
   final bool isSeeking;
+  final bool isImersive;
   final SeekDirection? seekDirection;
   final Duration position;
   final Duration duration;
@@ -23,6 +24,7 @@ class PlayerState extends Equatable {
     this.isBuffering = true,
     this.isOverlayVisible = true,
     this.isSeeking = false,
+    this.isImersive = false,
     this.seekDirection,
     this.position = Duration.zero,
     this.duration = Duration.zero,
@@ -38,6 +40,7 @@ class PlayerState extends Equatable {
     bool? isBuffering,
     bool? isOverlayVisible,
     bool? isSeeking,
+    bool? isImersive,
     SeekDirection? seekDirection,
     Duration? position,
     Duration? duration,
@@ -52,6 +55,7 @@ class PlayerState extends Equatable {
       isBuffering: isBuffering ?? this.isBuffering,
       isOverlayVisible: isOverlayVisible ?? this.isOverlayVisible,
       isSeeking: isSeeking ?? this.isSeeking,
+      isImersive: isImersive ?? this.isImersive,
       seekDirection: seekDirection ?? this.seekDirection,
       position: position ?? this.position,
       duration: duration ?? this.duration,
@@ -69,6 +73,7 @@ class PlayerState extends Equatable {
         isBuffering,
         isOverlayVisible,
         isSeeking,
+        isImersive,
         seekDirection,
         position,
         duration,

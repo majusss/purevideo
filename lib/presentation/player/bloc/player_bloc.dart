@@ -51,6 +51,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     on<UpdateBufferingState>(_onUpdateBufferingState);
     on<PlayerError>(_onPlayerError);
     on<DisposePlayer>(_onDisposePlayer);
+    on<ToggleImmersiveMode>(_onToggleImmersiveMode);
   }
 
   @override
@@ -379,6 +380,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         add(const HideControls());
       }
     });
+  }
+
+  Future<void> _onToggleImmersiveMode(
+    ToggleImmersiveMode event,
+    Emitter<PlayerState> emit,
+  ) async {
+    emit(state.copyWith(isImersive: !state.isImersive));
   }
 
   VideoController get controller => _controller;

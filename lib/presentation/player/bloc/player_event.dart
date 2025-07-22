@@ -129,6 +129,10 @@ class PlayerError extends PlayerEvent {
   List<Object> get props => [message];
 }
 
+class ToggleImmersiveMode extends PlayerEvent {
+  const ToggleImmersiveMode();
+}
+
 class DisposePlayer extends PlayerEvent {
   const DisposePlayer();
 }
