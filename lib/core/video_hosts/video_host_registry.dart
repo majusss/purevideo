@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
 class VideoHostRegistry {
@@ -8,14 +9,7 @@ class VideoHostRegistry {
   }
 
   VideoHostScraper? getScraperForUrl(String url) {
-    try {
-      return _scrapers.firstWhere(
-        (scraper) => scraper.canHandle(url),
-        orElse: () => throw Exception('Brak obsługi dla URL: $url'),
-      );
-    } catch (e) {
-      return null;
-    }
+    return _scrapers.firstWhereOrNull((scraper) => scraper.canHandle(url));
   }
 
   bool isHostSupported(String url) {

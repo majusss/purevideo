@@ -8,6 +8,7 @@ class MovieDetailsState extends Equatable {
   final String? errorMessage;
   final int selectedSeasonIndex;
   final List<String> directUrls;
+  final bool isLoaded;
 
   List<SeasonModel> get seasons => movie?.seasons ?? [];
 
@@ -26,6 +27,7 @@ class MovieDetailsState extends Equatable {
     this.errorMessage,
     this.selectedSeasonIndex = 0,
     this.directUrls = const [],
+    this.isLoaded = false,
   });
 
   MovieDetailsState copyWith({
@@ -34,8 +36,8 @@ class MovieDetailsState extends Equatable {
     String? errorMessage,
     int? selectedSeasonIndex,
     List<String>? directUrls,
-    bool? isLoadingEpisode,
     int? currentLoadingEpisodeIndex,
+    bool? isLoaded,
   }) {
     return MovieDetailsState(
       movie: movie ?? this.movie,
@@ -43,6 +45,7 @@ class MovieDetailsState extends Equatable {
       errorMessage: errorMessage,
       selectedSeasonIndex: selectedSeasonIndex ?? this.selectedSeasonIndex,
       directUrls: directUrls ?? this.directUrls,
+      isLoaded: isLoaded ?? this.isLoaded,
     );
   }
 
@@ -53,5 +56,6 @@ class MovieDetailsState extends Equatable {
         errorMessage,
         selectedSeasonIndex,
         directUrls,
+        isLoaded,
       ];
 }

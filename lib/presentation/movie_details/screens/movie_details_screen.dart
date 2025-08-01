@@ -244,6 +244,9 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                 const SizedBox(height: 24),
                 if (state.isSeries && state.seasons.isNotEmpty)
                   _buildSeriesSection(context, state),
+                for (var link in movie.videoUrls ?? []) Text(link.url),
+                const Divider(),
+                for (var link in movie.directUrls ?? []) Text(link.url),
               ]),
             ),
           ),
@@ -258,6 +261,9 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
 
     return FilledButton.icon(
       onPressed: () {
+        if (!state.isLoaded) {
+          return;
+        }
         if (movie.isSeries) {
           context.pushNamed(
             'player',
@@ -278,8 +284,12 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
           );
         }
       },
-      icon: const Icon(Icons.play_arrow),
-      label: Text(watchedText(state)),
+      icon: state.isLoaded
+          ? const Icon(Icons.play_arrow)
+          : const Icon(Icons.refresh),
+      label: state.isLoaded
+          ? Text(watchedText(state))
+          : const Text('Wczytywanie...'),
       style: FilledButton.styleFrom(
         padding: const EdgeInsets.symmetric(vertical: 12),
         minimumSize: const Size(double.infinity, 0),

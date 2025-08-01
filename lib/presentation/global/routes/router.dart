@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:purevideo/core/utils/global_context.dart';
+import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/settings/screens/about_screen.dart';
 import 'package:purevideo/presentation/global/screens/main_screen.dart';
 import 'package:purevideo/presentation/movies/screens/home_screen.dart';
@@ -17,6 +19,7 @@ import 'package:purevideo/presentation/settings/screens/theme_screen.dart';
 
 final GoRouter router = GoRouter(
   initialLocation: '/',
+  navigatorKey: getIt<GlobalContext>().globalNavigatorKey,
   routes: [
     GoRoute(
       path: '/login/:service',
@@ -26,7 +29,7 @@ final GoRouter router = GoRouter(
         return NoTransitionPage(
           child: LoginScreen(
             service: SupportedService.values.firstWhere(
-              (e) => e.toString() == service,
+              (e) => e.name == service,
             ),
           ),
         );

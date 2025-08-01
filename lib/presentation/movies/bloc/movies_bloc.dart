@@ -66,7 +66,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       _movies.addAll(_watchedService
           .getAll()
           .sorted(
-            (a, b) => a.watchedAt.compareTo(b.watchedAt),
+            (a, b) => b.watchedAt.compareTo(a.watchedAt),
           )
           .map((watched) => MovieModel(
                 service: watched.movie.service,

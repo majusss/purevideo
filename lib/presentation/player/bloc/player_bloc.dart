@@ -147,12 +147,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
         movieDetails = await _videoSourceRepository.scrapeVideoUrls(tempModel);
       } else {
-        movieDetails = await _videoSourceRepository.scrapeVideoUrls(_movie!);
+        movieDetails = _movie!;
+        // await _videoSourceRepository.scrapeVideoUrls(_movie!); we already done this in movie details block
       }
 
       if (movieDetails.directUrls != null &&
           movieDetails.directUrls!.isNotEmpty) {
-        // TODO: lepsze wybieranie i sprawdzanie źródeł
+        // TODO: better source selection logic
         final selectedSource = movieDetails.directUrls!.first;
 
         emit(state.copyWith(

@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:dio/io.dart';
 import 'package:purevideo/core/video_hosts/scrapers/doodstream_scraper.dart';
+import 'package:purevideo/core/video_hosts/scrapers/ekino_scraper.dart';
+import 'package:purevideo/core/video_hosts/scrapers/filemoon_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/kinoger_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/lulustream_scraper.dart';
 import 'package:purevideo/core/video_hosts/scrapers/streamruby_scraper.dart';
@@ -17,6 +19,7 @@ class VideoHostsContainer {
         connectTimeout: const Duration(seconds: 10),
         receiveTimeout: const Duration(seconds: 10),
         sendTimeout: const Duration(seconds: 10),
+        validateStatus: (status) => true,
       ),
     );
 
@@ -38,5 +41,9 @@ class VideoHostsContainer {
     registry.registerScraper(KinoGerScraper(dio));
     registry.registerScraper(LuluStreamScraper(dio));
     registry.registerScraper(StreamrubyScraper(dio));
+
+    // ekino-tv.pl
+    registry.registerScraper(EkinoScraper());
+    registry.registerScraper(FileMoonScraper(dio));
   }
 }

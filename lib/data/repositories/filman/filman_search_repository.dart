@@ -32,6 +32,10 @@ class FilmanSearchRepository implements SearchRepository {
 
   @override
   Future<List<MovieModel>> searchMovies(String query) async {
+    if (query.isEmpty) {
+      return [];
+    }
+
     await _prepareDio();
 
     final response = await _dio!.get(

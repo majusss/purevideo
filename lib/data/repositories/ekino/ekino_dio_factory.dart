@@ -4,11 +4,11 @@ import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
 import 'package:html/parser.dart' as html;
 
-class ObejrzyjtoDioFactory {
+class EkinoDioFactory {
   static Dio getDio([AccountModel? account]) {
     return Dio(
       BaseOptions(
-        baseUrl: SupportedService.obejrzyjto.baseUrl,
+        baseUrl: SupportedService.ekino.baseUrl,
         followRedirects: false,
         validateStatus: (_) => true,
         headers: {
@@ -25,7 +25,7 @@ class ObejrzyjtoDioFactory {
                   html.parse(response.data).querySelector('.code-label')?.text;
               if (error != null) {
                 throw ServiceExeption(
-                    SupportedService.obejrzyjto, 'Cloudflare error: $error');
+                    SupportedService.ekino, 'Cloudflare error: $error');
               }
               // idk maybe should throw blocked by cf exeption?
             }

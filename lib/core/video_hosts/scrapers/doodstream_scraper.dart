@@ -27,6 +27,7 @@ class DoodStreamScraper extends VideoHostScraper {
         'dood.ws',
         'dood.yt',
         'dood.li',
+        'dood.la',
         'ds2play.com',
         'ds2video.com',
         'doply.net'

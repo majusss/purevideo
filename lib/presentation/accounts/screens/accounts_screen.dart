@@ -32,7 +32,7 @@ class AccountsScreen extends StatelessWidget {
                     child: GestureDetector(
                       onTap: () => context.pushNamed(
                         'login',
-                        pathParameters: {'service': service.toString()},
+                        pathParameters: {'service': service.name},
                       ),
                       child: Card(
                         child: ListTile(
@@ -77,6 +77,7 @@ class AccountsScreen extends StatelessWidget {
                         return ListTile(
                           leading: SizedBox(
                             height: 32,
+                            width: 64,
                             child: FastCachedImage(url: account.key.image),
                           ),
                           title: Text(account.value.fields.entries

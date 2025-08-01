@@ -7,14 +7,11 @@ import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_dio_factory.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_utils.dart';
-import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 
 class ObejrzyjtoMovieRepository implements MovieRepository {
   final AuthRepository _authRepository = getIt<
       Map<SupportedService, AuthRepository>>()[SupportedService.obejrzyjto]!;
-  final VideoSourceRepository _videoSourceRepository =
-      getIt<VideoSourceRepository>();
 
   Dio? _dio;
 
@@ -87,11 +84,19 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     final List<SeasonModel> seasons = [];
 
     for (var i = 1; i <= seasonCount; i++) {
-      final seasonResponse = await _dio!.get(
-          '/api/v1/titles/$movieId/seasons/$i/episodes?perPage=999&excludeDescription=true&query=&orderBy=episode_number&orderDir=asc&page=1',
-          options: Options(headers: {
-            'Referer': 'https://www.obejrzyj.to/',
-          }));
+      final seasonResponse =
+          await _dio!.get('/api/v1/titles/$movieId/seasons/$i/episodes',
+              queryParameters: {
+                'perPage': 999,
+                'excludeDescription': true,
+                'query': '',
+                'orderBy': 'episode_number',
+                'orderDir': 'asc',
+                'page': 1,
+              },
+              options: Options(headers: {
+                'Referer': 'https://www.obejrzyj.to/',
+              }));
 
       final List episodesData = seasonResponse.data['pagination']['data'];
 
@@ -161,10 +166,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
       return series;
     }
 
-    final updatedMovieModel =
-        await _videoSourceRepository.scrapeVideoUrls(movieModel);
-
-    return updatedMovieModel;
+    return movieModel;
   }
 
   List<HostLink> _extractVideoUrls(List videoData) {

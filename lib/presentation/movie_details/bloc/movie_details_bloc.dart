@@ -48,6 +48,7 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
         emit(state.copyWith(
           movie: movie,
           selectedSeasonIndex: selectedSeasonIndex,
+          isLoaded: true,
         ));
       } else {
         emit(state.copyWith(movie: movie));
@@ -69,7 +70,7 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
       if (!event.movie.isSeries) {
         final updatedMovie =
             await _videoSourceRepository.scrapeVideoUrls(event.movie);
-        emit(state.copyWith(movie: updatedMovie));
+        emit(state.copyWith(movie: updatedMovie, isLoaded: true));
       }
     } catch (e) {
       emit(state.copyWith(
@@ -82,7 +83,6 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
       SelectSeason event, Emitter<MovieDetailsState> emit) async {
     emit(state.copyWith(
       selectedSeasonIndex: event.seasonIndex,
-      isLoadingEpisode: false,
     ));
   }
 

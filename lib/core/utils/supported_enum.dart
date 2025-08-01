@@ -1,6 +1,6 @@
 import 'package:hive_flutter/adapters.dart';
 
-enum SupportedService { filman, obejrzyjto }
+enum SupportedService { filman, obejrzyjto, ekino }
 
 class SupportedServiceAdapter extends TypeAdapter<SupportedService> {
   @override
@@ -23,13 +23,15 @@ extension SupportedServiceExtension on SupportedService {
   String get displayName => switch (this) {
         SupportedService.filman => 'Filman.cc',
         SupportedService.obejrzyjto => 'Obejrzyj.to',
+        SupportedService.ekino => 'Ekino-tv.pl',
       };
 
   String get image => switch (this) {
         SupportedService.filman =>
-          'https://filman.cc/public/dist/images/favicon.png',
+          'https://filman.cc/public/dist/images/logo.png',
         SupportedService.obejrzyjto =>
-          'https://obejrzyj.to/favicon/icon-144x144.png',
+          'https://obejrzyj.to/storage/branding_media/ead386d3-fca5-4082-8754-2a0992ae8c22.png',
+        SupportedService.ekino => 'https://ekino-tv.pl/views/img/logo.png'
       };
 
   List<Map<String, InputType>> get loginRequiredFields => switch (this) {
@@ -42,10 +44,28 @@ extension SupportedServiceExtension on SupportedService {
             {'email': InputType.text},
             {'password': InputType.password},
           ],
+        SupportedService.ekino => [
+            {'login': InputType.text},
+            {'password': InputType.password},
+            {'g-recaptcha-response': InputType.recaptcha},
+          ],
       };
 
   bool get canBeAnonymous => switch (this) {
         SupportedService.filman => false,
         SupportedService.obejrzyjto => true,
+        SupportedService.ekino => true,
+      };
+
+  String get baseUrl => switch (this) {
+        SupportedService.filman => 'https://filman.cc',
+        SupportedService.obejrzyjto => 'https://obejrzyj.to',
+        SupportedService.ekino => 'https://ekino-tv.pl',
+      };
+
+  String get reCaptchaSiteKey => switch (this) {
+        SupportedService.filman => '6LcQs24iAAAAALFibpEQwpQZiyhOCn-zdc-eFout',
+        SupportedService.obejrzyjto => '',
+        SupportedService.ekino => '6Lfk0J0aAAAAACxgxuV0XOQsGUq3w-CX3TZUULuC',
       };
 }

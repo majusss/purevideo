@@ -1,12 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:purevideo/core/error/exceptions.dart';
+import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
 
 class FilmanDioFactory {
   static Dio getDio([AccountModel? account]) {
     return Dio(
       BaseOptions(
-        baseUrl: 'https://filman.cc',
+        baseUrl: SupportedService.filman.baseUrl,
         followRedirects: false,
         validateStatus: (_) => true,
         headers: {

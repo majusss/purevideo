@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:purevideo/core/services/captcha_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_bloc.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_event.dart';
-import 'package:purevideo/presentation/accounts/widgets/re_captcha.dart';
 import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -47,43 +47,42 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-          appBar:
-              AppBar(title: Text('Logowanie do ${widget.service.displayName}')),
-          body: Padding(
-            padding: const EdgeInsets.all(16),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ..._buildFormFields(),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: _handleSubmit,
-                    child: const Text('Zaloguj'),
-                  ),
-                  if (widget.service.canBeAnonymous) ...[
-                    const SizedBox(height: 16),
-                    OutlinedButton(
-                      onPressed: () {
-                        context.read<AccountsBloc>().add(
-                              SignInRequested(
-                                service: widget.service,
-                                fields: {'anonymous': 'true'},
-                              ),
-                            );
-                        if (context.canPop()) {
-                          context.pop();
-                        }
-                      },
-                      child: const Text('Zaloguj jako gość'),
-                    ),
-                  ]
-                ],
+      appBar: AppBar(title: Text('Logowanie do ${widget.service.displayName}')),
+      body: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ..._buildFormFields(),
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _handleSubmit,
+                child: const Text('Zaloguj'),
               ),
-            ),
+              if (widget.service.canBeAnonymous) ...[
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: () {
+                    context.read<AccountsBloc>().add(
+                          SignInRequested(
+                            service: widget.service,
+                            fields: {'anonymous': 'true'},
+                          ),
+                        );
+                    if (context.canPop()) {
+                      context.pop();
+                    }
+                  },
+                  child: const Text('Zaloguj jako gość'),
+                ),
+              ]
+            ],
           ),
-        );
+        ),
+      ),
+    );
   }
 
   List<Widget> _buildFormFields() {
@@ -94,16 +93,34 @@ class _LoginScreenState extends State<LoginScreen> {
           formFields.add(
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: GoogleReCaptcha(
-                // TODO: Make siteKey and url dynamic if necessary per service
-                siteKey: '6LcQs24iAAAAALFibpEQwpQZiyhOCn-zdc-eFout',
-                url: 'https://filman.cc',
-                onToken: (token) {
-                  setState(() {
-                    _fieldValues[fieldName] = token;
-                  });
-                },
-              ),
+              child: _fieldValues[fieldName] != null &&
+                      _fieldValues[fieldName]!.isNotEmpty
+                  ? (const Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(Icons.check_circle, color: Colors.green),
+                        SizedBox(width: 8),
+                        Text('Captcha zweryfikowana'),
+                      ],
+                    ))
+                  : ElevatedButton(
+                      onPressed: () async {
+                        final token = (await getIt<CaptchaService>().getToken(
+                                SupportedCaptchaService.recaptcha,
+                                widget.service.reCaptchaSiteKey,
+                                widget.service.baseUrl))
+                            ?.token;
+
+                        if (token == null) {
+                          return;
+                        }
+
+                        setState(() {
+                          _fieldValues[fieldName] = token;
+                        });
+                      },
+                      child: const Text('Weryfikuj Captcha'),
+                    ),
             ),
           );
         } else {
@@ -147,7 +164,6 @@ class _LoginScreenState extends State<LoginScreen> {
     if (_hasRecaptcha &&
         (_fieldValues['g-recaptcha-response'] == null ||
             _fieldValues['g-recaptcha-response']!.isEmpty)) {
-      getIt<ReCaptchaBloc>().add(const ReCaptchaShown());
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Proszę rozwiązać reCAPTCHA')),
       );

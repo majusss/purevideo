@@ -8,7 +8,6 @@ import 'package:purevideo/data/models/auth_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_dio_factory.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
-import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:html/parser.dart' as html;
 import 'package:html/dom.dart' as dom;
 import 'package:purevideo/di/injection_container.dart';
@@ -16,8 +15,6 @@ import 'package:purevideo/di/injection_container.dart';
 class FilmanMovieRepository implements MovieRepository {
   final AuthRepository _authRepository =
       getIt<Map<SupportedService, AuthRepository>>()[SupportedService.filman]!;
-  final VideoSourceRepository _videoSourceRepository =
-      getIt<VideoSourceRepository>();
   Dio? _dio;
 
   FilmanMovieRepository() {
@@ -243,9 +240,7 @@ class FilmanMovieRepository implements MovieRepository {
       videoUrls: videoUrls,
     );
 
-    final updatedMovieModel =
-        await _videoSourceRepository.scrapeVideoUrls(movieModel);
-    return updatedMovieModel;
+    return movieModel;
   }
 
   @override

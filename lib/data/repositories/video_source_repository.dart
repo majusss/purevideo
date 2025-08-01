@@ -1,4 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:io';
+
+import 'package:dio/io.dart';
 import 'package:purevideo/core/video_hosts/video_host_registry.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -23,16 +25,27 @@ class VideoSourceRepository {
 
       if (videoSource == null) continue;
 
-      final dio = Dio();
+      final Dio dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 10),
+          receiveTimeout: const Duration(seconds: 10),
+          sendTimeout: const Duration(seconds: 10),
+        ),
+      );
+
+      final ioc = HttpClient();
+      ioc.badCertificateCallback =
+          (X509Certificate cert, String host, int port) => true;
+
+      dio.httpClientAdapter = IOHttpClientAdapter(
+        createHttpClient: () => ioc,
+      );
+
       final response = await dio.head(videoSource.url,
           options: Options(
               headers: videoSource.headers, validateStatus: (_) => true));
 
-      if (response.statusCode != 200) {
-        debugPrint(
-            'Video source ${videoSource.url} returned status code ${response.statusCode}');
-        continue;
-      }
+      if (response.statusCode != 200) continue;
 
       videoSources.add(videoSource);
     }
