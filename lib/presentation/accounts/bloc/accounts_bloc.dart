@@ -14,7 +14,7 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
   final Map<SupportedService, AuthRepository> _repositories = getIt();
   final Map<SupportedService, AccountModel> _accounts = {};
 
-  AccountsBloc() : super(const AccountsLoading()) {
+  AccountsBloc() : super(const AccountsLoading({})) {
     on<SignInRequested>(_onSignInRequested);
     on<SignOutRequested>(_onSignOutRequested);
     on<LoadAccountsRequested>(_onLoadAccountsRequested);
@@ -40,7 +40,7 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     Emitter<AccountsState> emit,
   ) async {
     try {
-      emit(const AccountsLoading());
+      emit(AccountsLoading(_accounts));
 
       final repository = _repositories[event.service];
       if (repository == null) {
@@ -78,7 +78,7 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     Emitter<AccountsState> emit,
   ) async {
     try {
-      emit(const AccountsLoading());
+      emit(AccountsLoading(_accounts));
       final repository = _repositories[event.service];
       if (repository == null) {
         emit(AccountsError('Brak obsługi serwisu ${event.service}'));
@@ -96,7 +96,7 @@ class AccountsBloc extends Bloc<AccountsEvent, AccountsState> {
     Emitter<AccountsState> emit,
   ) async {
     try {
-      emit(const AccountsLoading());
+      emit(AccountsLoading(_accounts));
 
       for (final service in _repositories.keys) {
         final account = await getAccountForService(service);
