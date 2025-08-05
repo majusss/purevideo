@@ -105,11 +105,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     ))
                   : ElevatedButton(
                       onPressed: () async {
-                        final token = (await getIt<CaptchaService>().getToken(
-                                SupportedCaptchaService.recaptcha,
-                                widget.service.reCaptchaSiteKey,
-                                widget.service.baseUrl))
-                            ?.token;
+                        final token = await getIt<CaptchaService>().getToken(
+                            widget.service.loginCaptchaConfig,
+                            widget.service.baseUrl);
 
                         if (token == null) {
                           return;

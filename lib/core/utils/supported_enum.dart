@@ -1,4 +1,5 @@
 import 'package:hive_flutter/adapters.dart';
+import 'package:purevideo/core/services/captcha_service.dart';
 
 enum SupportedService { filman, obejrzyjto, ekino }
 
@@ -47,7 +48,6 @@ extension SupportedServiceExtension on SupportedService {
         SupportedService.ekino => [
             {'login': InputType.text},
             {'password': InputType.password},
-            {'g-recaptcha-response': InputType.recaptcha},
           ],
       };
 
@@ -63,9 +63,21 @@ extension SupportedServiceExtension on SupportedService {
         SupportedService.ekino => 'https://ekino-tv.pl',
       };
 
-  String get reCaptchaSiteKey => switch (this) {
-        SupportedService.filman => '6LcQs24iAAAAALFibpEQwpQZiyhOCn-zdc-eFout',
-        SupportedService.obejrzyjto => '',
-        SupportedService.ekino => '6Lfk0J0aAAAAACxgxuV0XOQsGUq3w-CX3TZUULuC',
+  CaptchaConfig get loginCaptchaConfig => switch (this) {
+        SupportedService.filman => CaptchaConfig(
+            service: CaptchaServiceProvider.recaptcha,
+            siteKey: '6LcQs24iAAAAALFibpEQwpQZiyhOCn-zdc-eFout',
+            isInvisible: false,
+          ),
+        SupportedService.obejrzyjto => CaptchaConfig(
+            service: CaptchaServiceProvider.recaptcha,
+            siteKey: '',
+            isInvisible: false,
+          ),
+        SupportedService.ekino => CaptchaConfig(
+            service: CaptchaServiceProvider.recaptcha,
+            siteKey: '6Lfk0J0aAAAAACxgxuV0XOQsGUq3w-CX3TZUULuC',
+            isInvisible: true,
+          ),
       };
 }

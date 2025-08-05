@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:dio/io.dart';
+import 'package:flutter/material.dart';
 import 'package:purevideo/core/video_hosts/video_host_registry.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -41,11 +42,16 @@ class VideoSourceRepository {
         createHttpClient: () => ioc,
       );
 
-      final response = await dio.head(videoSource.url,
-          options: Options(
-              headers: videoSource.headers, validateStatus: (_) => true));
+      try {
+        final response = await dio.head(videoSource.url,
+            options: Options(
+                headers: videoSource.headers, validateStatus: (_) => true));
 
-      if (response.statusCode != 200) continue;
+        if (response.statusCode != 200) continue;
+      } catch (e) {
+        debugPrint('Error checking video source URL: $e');
+        continue;
+      }
 
       videoSources.add(videoSource);
     }

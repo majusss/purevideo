@@ -32,7 +32,7 @@ class WebViewService {
       String url, String elementSelector) async {
     final completer = Completer<dom.Element?>();
 
-    _executeJavaScript(url, _getJsCodeForElement(elementSelector))
+    executeJavaScript(url, _getJsCodeForElement(elementSelector))
         .then((result) {
       if (result != null) {
         final document = dom.Document.html(result);
@@ -49,7 +49,7 @@ class WebViewService {
     return completer.future;
   }
 
-  Future<String?> _executeJavaScript(String url, String jsCode) async {
+  Future<String?> executeJavaScript(String url, String jsCode) async {
     final completer = Completer<String?>();
 
     showDialog(
@@ -80,18 +80,14 @@ class WebViewService {
             disableVerticalScroll: true,
             javaScriptEnabled: true,
             domStorageEnabled: true,
+            clearCache: true,
+            cacheEnabled: false,
+            incognito: true,
           ),
-          onLoadStop: (controller, url) async {
-            try {
-              await controller.evaluateJavascript(source: jsCode);
-            } catch (e) {
-              debugPrint('Błąd wykonywania JavaScript: $e');
-              if (context.mounted) {
-                _showErrorDialog(context, controller, completer);
-              }
-            }
-          },
-          onWebViewCreated: (controller) {
+          onWebViewCreated: (controller) async {
+            await CookieManager.instance().deleteAllCookies();
+            await WebStorageManager.instance().deleteAllData();
+
             controller.addJavaScriptHandler(
               handlerName: 'messageHandler',
               callback: (message) {
@@ -103,6 +99,16 @@ class WebViewService {
                 }
               },
             );
+          },
+          onLoadStop: (controller, url) async {
+            try {
+              await controller.evaluateJavascript(source: jsCode);
+            } catch (e) {
+              debugPrint('Błąd wykonywania JavaScript: $e');
+              if (context.mounted) {
+                _showErrorDialog(context, controller, completer);
+              }
+            }
           },
         ),
       ),

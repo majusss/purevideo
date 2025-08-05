@@ -2,12 +2,14 @@ import 'dart:convert';
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:purevideo/core/services/webview_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
 import 'package:purevideo/data/models/auth_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/ekino/ekino_dio_factory.dart';
 import 'package:purevideo/core/services/secure_storage_service.dart';
+import 'package:purevideo/di/injection_container.dart';
 
 class EkinoAuthRepository implements AuthRepository {
   late Dio _dio;
@@ -65,6 +67,36 @@ class EkinoAuthRepository implements AuthRepository {
   @override
   Stream<AuthModel> get authStream => _authController.stream;
 
+  String _getEkinoLoginScript(String login, String password) {
+    return '''
+      (function() {
+        function waitForElement(selector, callback) {
+          const element = document.querySelector(selector);
+          if (element) {
+            callback(element);
+          } else {
+            setTimeout(() => waitForElement(selector, callback), 100);
+          }
+        }
+        waitForElement('.alert.alert-success', function(element) {
+          window.flutter_inappwebview.callHandler('messageHandler', JSON.stringify({success: true, cookies: document.cookie}));
+        });
+        waitForElement('.alert.alert-danger', function(element) {
+          window.flutter_inappwebview.callHandler('messageHandler', JSON.stringify({success: false, error: element.textContent.trim()}));
+        });
+        waitForElement('#login_fr', function(element) {
+          document.forms['login_fr'].login.value = '$login';
+          document.forms['login_fr'].password.value = '$password';
+          document.forms['login_fr'].querySelector("input[type='submit']").click();
+          // window.flutter_inappwebview.callHandler('messageHandler', element.outerHTML);
+        });
+        setTimeout(() => {
+          window.flutter_inappwebview.callHandler('messageHandler', null, 'timeout');
+        }, 15000);
+      })();
+    ''';
+  }
+
   @override
   Future<AuthModel> signIn(
     Map<String, String> fields,
@@ -103,13 +135,50 @@ class EkinoAuthRepository implements AuthRepository {
         return authModel;
       }
 
-      final authModel = AuthModel(
-        service: SupportedService.ekino,
-        success: false,
-        error: ['Nie zaimplementowano logowania :P'],
-      );
-      _authController.add(authModel);
-      return authModel;
+      final webviewLogin = await getIt<WebViewService>().executeJavaScript(
+          '${SupportedService.ekino.baseUrl}/login',
+          _getEkinoLoginScript(fields['login']!, fields['password']!));
+
+      try {
+        final json = jsonDecode(webviewLogin!);
+        if (json['success'] == true && json['cookies'] != null) {
+          final cookies = (json['cookies'] as String).split(';').toList();
+
+          debugPrint('Zalogowano pomyślnie: $cookies');
+
+          _account = AccountModel(
+            fields: fields,
+            cookies: cookies,
+            service: SupportedService.ekino,
+          );
+
+          final authModel = AuthModel(
+            service: SupportedService.ekino,
+            success: true,
+            account: _account,
+          );
+          _authController.add(authModel);
+          return authModel;
+        } else {
+          final authModel = AuthModel(
+            service: SupportedService.ekino,
+            success: false,
+            error: [json['error'] ?? 'Nieznany błąd logowania $webviewLogin'],
+          );
+          _authController.add(authModel);
+          return authModel;
+        }
+      } catch (e) {
+        debugPrint('Błąd parsowania odpowiedzi logowania: $e');
+
+        final authModel = AuthModel(
+          service: SupportedService.ekino,
+          success: false,
+          error: ['Błąd parsowania odpowiedzi logowania: $e'],
+        );
+        _authController.add(authModel);
+        return authModel;
+      }
     } catch (e) {
       final authModel = AuthModel(
         service: SupportedService.ekino,
