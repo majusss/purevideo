@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
@@ -11,6 +12,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 
 class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   final Map<SupportedService, MovieRepository> _movieRepositories = getIt();
+  final Map<SupportedService, AuthRepository> _authRepositories = getIt();
   final VideoSourceRepository _videoSourceRepository = getIt();
   final WatchedService _watchedService = getIt();
 
@@ -24,6 +26,18 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   Future<void> _onLoadMovieDetails(
       LoadMovieDetails event, Emitter<MovieDetailsState> emit) async {
     try {
+      final authRepository = _authRepositories[event.service];
+      if (authRepository == null) {
+        throw Exception('Brak obsługi serwisu ${event.service}');
+      }
+
+      final account = authRepository.getAccount();
+      if (account == null) {
+        return emit(state.copyWith(
+          errorMessage: 'Nie jesteś zalogowany do ${event.service.displayName}',
+        ));
+      }
+
       final movieRepository = _movieRepositories[event.service];
       if (movieRepository == null) {
         throw Exception('Brak obsługi serwisu ${event.service}');
