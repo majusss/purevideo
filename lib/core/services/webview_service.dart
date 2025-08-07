@@ -21,9 +21,9 @@ class WebViewService {
         waitForElement('$elementSelector', function(element) {
           window.flutter_inappwebview.callHandler('messageHandler', element.outerHTML);
         });
-        setTimeout(() => {
-          window.flutter_inappwebview.callHandler('messageHandler', null, 'timeout');
-        }, 15000);
+        // setTimeout(() => {
+        //   window.flutter_inappwebview.callHandler('messageHandler', null, 'timeout');
+        // }, 15000);
       })();
     ''';
   }

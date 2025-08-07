@@ -90,9 +90,6 @@ class EkinoAuthRepository implements AuthRepository {
           document.forms['login_fr'].querySelector("input[type='submit']").click();
           // window.flutter_inappwebview.callHandler('messageHandler', element.outerHTML);
         });
-        setTimeout(() => {
-          window.flutter_inappwebview.callHandler('messageHandler', null, 'timeout');
-        }, 15000);
       })();
     ''';
   }
