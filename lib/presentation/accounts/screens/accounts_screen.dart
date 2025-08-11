@@ -2,6 +2,8 @@ import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/repositories/auth_repository.dart';
+import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_bloc.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_event.dart';
 import 'package:purevideo/presentation/accounts/bloc/accounts_state.dart';
@@ -47,7 +49,20 @@ class AccountsScreen extends StatelessWidget {
                               leading: SizedBox(
                                 width: 32,
                                 height: 32,
-                                child: FastCachedImage(url: service.image),
+                                child: FastCachedImage(
+                                    url: service.image,
+                                    headers: {
+                                      'User-Agent':
+                                          'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+                                      'Cookie': getIt<
+                                                      Map<SupportedService,
+                                                          AuthRepository>>()[
+                                                  service]
+                                              ?.getAccount()
+                                              ?.cookies
+                                              .join('; ') ??
+                                          '',
+                                    }),
                               ),
                               title: Text(service.displayName),
                               trailing: const Icon(Icons.login),
@@ -86,7 +101,20 @@ class AccountsScreen extends StatelessWidget {
                               leading: SizedBox(
                                 height: 32,
                                 width: 64,
-                                child: FastCachedImage(url: account.key.image),
+                                child: FastCachedImage(
+                                    url: account.key.image,
+                                    headers: {
+                                      'User-Agent':
+                                          'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+                                      'Cookie': getIt<
+                                                      Map<SupportedService,
+                                                          AuthRepository>>()[
+                                                  account.key]
+                                              ?.getAccount()
+                                              ?.cookies
+                                              .join('; ') ??
+                                          '',
+                                    }),
                               ),
                               title: Text(account.value.fields.entries
                                   .firstWhere(
