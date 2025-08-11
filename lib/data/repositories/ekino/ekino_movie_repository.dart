@@ -105,7 +105,7 @@ class EkinoMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<MovieDetailsModel> getMovieDetails(String url) async {
+  Future<ServiceMovieDetailsModel> getMovieDetails(String url) async {
     await _prepareDio();
 
     final response = await _dio!.get(url);
@@ -200,15 +200,12 @@ class EkinoMovieRepository implements MovieRepository {
         }
       }
 
-      return MovieDetailsModel(
+      return ServiceMovieDetailsModel(
         service: SupportedService.ekino,
         url: url,
         title: cleanTitle,
         description: description,
         imageUrl: imageUrl,
-        year: '',
-        genres: [],
-        countries: [],
         isSeries: true,
         seasons: seasons.reversed.toList(),
       );
@@ -216,15 +213,12 @@ class EkinoMovieRepository implements MovieRepository {
 
     final videoUrls = await _extractHostLinksFromDocument(document);
 
-    final movieModel = MovieDetailsModel(
+    final movieModel = ServiceMovieDetailsModel(
       service: SupportedService.ekino,
       url: url,
       title: cleanTitle,
       description: description,
       imageUrl: imageUrl,
-      year: '',
-      genres: [],
-      countries: [],
       isSeries: false,
       videoUrls: videoUrls,
     );
@@ -233,13 +227,13 @@ class EkinoMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<List<MovieModel>> getMovies() async {
+  Future<List<ServiceMovieModel>> getMovies() async {
     await _prepareDio();
 
     final response = await _dio!.get('/');
     final document = html.parse(response.data);
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
 
     final movieSections = document.querySelectorAll('.mostPopular');
 
@@ -285,7 +279,7 @@ class EkinoMovieRepository implements MovieRepository {
           cleanTitle = title.split(' - CAM').first.trim();
         }
 
-        final movie = MovieModel(
+        final movie = ServiceMovieModel(
           service: SupportedService.ekino,
           title: cleanTitle,
           imageUrl: imageUrl,

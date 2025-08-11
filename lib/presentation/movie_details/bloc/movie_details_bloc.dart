@@ -26,51 +26,51 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   Future<void> _onLoadMovieDetails(
       LoadMovieDetails event, Emitter<MovieDetailsState> emit) async {
     try {
-      final authRepository = _authRepositories[event.service];
-      if (authRepository == null) {
-        throw Exception('Brak obsługi serwisu ${event.service}');
-      }
+      // final authRepository = _authRepositories[event.service];
+      // if (authRepository == null) {
+      //   throw Exception('Brak obsługi serwisu ${event.service}');
+      // }
 
-      final account = authRepository.getAccount();
-      if (account == null) {
-        return emit(state.copyWith(
-          errorMessage: 'Nie jesteś zalogowany do ${event.service.displayName}',
-        ));
-      }
+      // final account = authRepository.getAccount();
+      // if (account == null) {
+      //   return emit(state.copyWith(
+      //     errorMessage: 'Nie jesteś zalogowany do ${event.service.displayName}',
+      //   ));
+      // }
 
-      final movieRepository = _movieRepositories[event.service];
-      if (movieRepository == null) {
-        throw Exception('Brak obsługi serwisu ${event.service}');
-      }
+      // final movieRepository = _movieRepositories[event.service];
+      // if (movieRepository == null) {
+      //   throw Exception('Brak obsługi serwisu ${event.service}');
+      // }
 
-      final movie = await movieRepository.getMovieDetails(event.url);
+      // final movie = await movieRepository.getMovieDetails(event.url);
 
-      FirebaseAnalytics.instance
-          .logSelectContent(contentType: 'video', itemId: movie.url);
+      // FirebaseAnalytics.instance
+      //     .logSelectContent(contentType: 'video', itemId: movie.url);
 
-      final watched = _watchedService.getByMovie(movie);
+      // final watched = _watchedService.getByMovie(movie);
 
-      emit(state.copyWith(watched: watched));
+      // emit(state.copyWith(watched: watched));
 
-      if (movie.isSeries) {
-        final lastWatchedSeason = watched?.lastWatchedEpisode?.season;
-        final selectedSeasonIndex = lastWatchedSeason != null
-            ? movie.seasons
-                ?.indexWhere((s) => s.number == lastWatchedSeason.number)
-            : 0;
+      // if (movie.isSeries) {
+      //   final lastWatchedSeason = watched?.lastWatchedEpisode?.season;
+      //   final selectedSeasonIndex = lastWatchedSeason != null
+      //       ? movie.seasons
+      //           ?.indexWhere((s) => s.number == lastWatchedSeason.number)
+      //       : 0;
 
-        emit(state.copyWith(
-          movie: movie,
-          selectedSeasonIndex: selectedSeasonIndex,
-          isLoaded: true,
-        ));
-      } else {
-        emit(state.copyWith(movie: movie));
-      }
+      //   emit(state.copyWith(
+      //     movie: movie,
+      //     selectedSeasonIndex: selectedSeasonIndex,
+      //     isLoaded: true,
+      //   ));
+      // } else {
+      //   emit(state.copyWith(movie: movie));
+      // }
 
-      if (!movie.isSeries) {
-        add(ScrapeVideoUrls(movie: movie, service: event.service));
-      }
+      // if (!movie.isSeries) {
+      //   add(ScrapeVideoUrls(movie: movie, service: event.service));
+      // }
     } catch (e) {
       emit(state.copyWith(
         errorMessage: 'Nie udało się załadować szczegółów filmu: $e',

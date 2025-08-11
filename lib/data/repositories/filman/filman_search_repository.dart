@@ -31,7 +31,7 @@ class FilmanSearchRepository implements SearchRepository {
   }
 
   @override
-  Future<List<MovieModel>> searchMovies(String query) async {
+  Future<List<ServiceMovieModel>> searchMovies(String query) async {
     if (query.isEmpty) {
       return [];
     }
@@ -45,7 +45,7 @@ class FilmanSearchRepository implements SearchRepository {
 
     final document = html.parse(response.data);
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
 
     document
         .querySelectorAll('.col-xs-6.col-sm-3.col-lg-2')
@@ -59,7 +59,7 @@ class FilmanSearchRepository implements SearchRepository {
           poster?.querySelector('a')?.attributes['href'] ?? 'Brak danych';
 
       if (title.isEmpty || imageUrl.isEmpty == true || link.isEmpty) return;
-      movies.add(MovieModel(
+      movies.add(ServiceMovieModel(
           service: SupportedService.filman,
           title: title,
           imageUrl: imageUrl,

@@ -11,16 +11,14 @@ abstract class MovieDetailsEvent extends Equatable {
 }
 
 class LoadMovieDetails extends MovieDetailsEvent {
-  final SupportedService service;
-  final String url;
+  final MovieModel movie;
 
   const LoadMovieDetails({
-    required this.service,
-    required this.url,
+    required this.movie,
   });
 
   @override
-  List<Object> get props => [service, url];
+  List<Object> get props => [movie];
 }
 
 class ScrapeVideoUrls extends MovieDetailsEvent {
