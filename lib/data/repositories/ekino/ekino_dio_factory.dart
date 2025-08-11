@@ -13,7 +13,7 @@ class EkinoDioFactory {
         validateStatus: (_) => true,
         headers: {
           'User-Agent':
-              'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+              'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
           if (account != null) 'Cookie': account.cookies.join('; '),
         },
       ),

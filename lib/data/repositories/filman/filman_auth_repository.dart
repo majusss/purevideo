@@ -92,6 +92,7 @@ class FilmanAuthRepository implements AuthRepository {
         return authModel;
       }
       final cookiesHeader = response.headers['set-cookie'];
+      debugPrint('Ciasteczka: $cookiesHeader');
       if (cookiesHeader != null) {
         _account = AccountModel(
           fields: fields,

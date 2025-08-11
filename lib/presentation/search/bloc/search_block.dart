@@ -41,6 +41,10 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
       for (final entry in _searchRepositories.entries) {
         try {
+          final account = _authRepositories[entry.key]?.getAccount();
+          if (account == null) {
+            continue;
+          }
           final repositoryResults = await entry.value.searchMovies(event.query);
           results.addAll(repositoryResults);
         } catch (e) {
