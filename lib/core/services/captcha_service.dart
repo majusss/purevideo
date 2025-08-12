@@ -226,7 +226,6 @@ class CaptchaService {
                     message[0] is String &&
                     message[0] != null) {
                   String? token = message[0] as String?;
-                  debugPrint('Turnstile token: $token', wrapWidth: 1024);
                   if (token != null && token.isNotEmpty) {
                     if (!completer.isCompleted) {
                       completer.complete(token);

@@ -104,7 +104,6 @@ class WebViewService {
                   try {
                     final cookies =
                         await CookieManager.instance().getCookies(url: url!);
-                    debugPrint('Cookies: $cookies');
                     final cfClearance = cookies.firstWhereOrNull(
                       (cookie) => cookie.name == 'cf_clearance',
                     );

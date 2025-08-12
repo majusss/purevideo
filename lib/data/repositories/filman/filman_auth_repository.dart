@@ -92,7 +92,6 @@ class FilmanAuthRepository implements AuthRepository {
         return authModel;
       }
       final cookiesHeader = response.headers['set-cookie'];
-      debugPrint('Ciasteczka: $cookiesHeader');
       if (cookiesHeader != null) {
         _account = AccountModel(
           fields: fields,
@@ -129,6 +128,26 @@ class FilmanAuthRepository implements AuthRepository {
   @override
   AccountModel? getAccount() {
     return _account;
+  }
+
+  @override
+  Future<void> setAccount(AccountModel account) async {
+    _account = account;
+    _dio = FilmanDioFactory.getDio(_account);
+
+    await SecureStorageService.saveServiceData(
+      SupportedService.filman,
+      'account',
+      jsonEncode(account.toMap()),
+    );
+
+    _authController.add(
+      AuthModel(
+        service: SupportedService.filman,
+        success: true,
+        account: _account,
+      ),
+    );
   }
 
   @override

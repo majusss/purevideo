@@ -107,7 +107,6 @@ class EkinoAuthRepository implements AuthRepository {
           final cookies = reponse.headers['set-cookie']!
               .map((cookie) => cookie.split(';').first)
               .toList();
-          debugPrint(cookies.toString());
           _account = AccountModel(
             fields: {
               'login': 'Gość',
@@ -190,6 +189,26 @@ class EkinoAuthRepository implements AuthRepository {
   @override
   AccountModel? getAccount() {
     return _account;
+  }
+
+  @override
+  Future<void> setAccount(AccountModel account) async {
+    _account = account;
+    _dio = EkinoDioFactory.getDio(_account);
+
+    await SecureStorageService.saveServiceData(
+      SupportedService.ekino,
+      'account',
+      jsonEncode(account.toMap()),
+    );
+
+    _authController.add(
+      AuthModel(
+        service: SupportedService.ekino,
+        success: true,
+        account: _account,
+      ),
+    );
   }
 
   @override

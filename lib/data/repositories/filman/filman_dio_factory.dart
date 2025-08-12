@@ -1,9 +1,10 @@
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:purevideo/core/error/exceptions.dart';
 import 'package:purevideo/core/services/webview_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/account_model.dart';
+import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 
 class FilmanDioFactory {
@@ -24,8 +25,6 @@ class FilmanDioFactory {
       InterceptorsWrapper(
         onResponse: (response, handler) async {
           if (response.data.toString().contains('Just a moment...')) {
-            debugPrint(
-                'initialCookies: ${response.requestOptions.headers['Cookie']}');
             final cookies = await getIt<WebViewService>().getCfCookies(
               response.requestOptions.uri.toString(),
               initialCookies: response.requestOptions.headers['Cookie'],
@@ -35,6 +34,30 @@ class FilmanDioFactory {
             final newResponse = await dio.fetch(requestOptions);
             newResponse.headers['Set-Cookie']
                 ?.addAll(cookies?.split('; ') as Iterable<String>);
+            // TODO: make this code cleaner
+            final cfClearance = cookies?.split('; ').firstWhereOrNull(
+                  (cookie) => cookie.startsWith('cf_clearance='),
+                );
+            if (cfClearance != null) {
+              final authRepository =
+                  getIt<Map<SupportedService, AuthRepository>>()[
+                      SupportedService.filman];
+              final account = authRepository?.getAccount();
+              if (account != null) {
+                final cookies = account.cookies.map((cookie) {
+                  if (cookie.startsWith('cf_clearance=')) {
+                    return cfClearance;
+                  }
+                  return cookie;
+                }).toList();
+
+                authRepository?.setAccount(AccountModel(
+                  service: SupportedService.filman,
+                  fields: account.fields,
+                  cookies: cookies,
+                ));
+              }
+            }
             return handler.next(newResponse);
           }
           if (response.headers.map['location']?.contains(

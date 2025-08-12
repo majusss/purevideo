@@ -151,6 +151,26 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> setAccount(AccountModel account) async {
+    _account = account;
+    _dio = ObejrzyjtoDioFactory.getDio(_account);
+
+    await SecureStorageService.saveServiceData(
+      SupportedService.obejrzyjto,
+      'account',
+      jsonEncode(account.toMap()),
+    );
+
+    _authController.add(
+      AuthModel(
+        service: SupportedService.obejrzyjto,
+        success: true,
+        account: _account,
+      ),
+    );
+  }
+
+  @override
   Future<void> signOut() async {
     _account = null;
     _dio = ObejrzyjtoDioFactory.getDio(null);
