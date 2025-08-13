@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:purevideo/core/error/exceptions.dart';
@@ -17,7 +19,10 @@ class FilmanDioFactory {
         headers: {
           'User-Agent':
               'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
-          if (account != null) 'Cookie': account.cookies.join('; '),
+          if (account != null)
+            'Cookie': account.cookies
+                .map((cookie) => '${cookie.name}=${cookie.value}')
+                .join('; '),
         },
       ),
     );
@@ -25,27 +30,36 @@ class FilmanDioFactory {
       InterceptorsWrapper(
         onResponse: (response, handler) async {
           if (response.data.toString().contains('Just a moment...')) {
+            final List<Cookie> initialCookies =
+                (response.requestOptions.headers['Cookie'] as String?)
+                        ?.split(';')
+                        .map((cookie) => Cookie.fromSetCookieValue(cookie))
+                        .toList() ??
+                    [];
+
             final cookies = await getIt<WebViewService>().getCfCookies(
               response.requestOptions.uri.toString(),
-              initialCookies: response.requestOptions.headers['Cookie'],
+              initialCookies: initialCookies,
             );
             final requestOptions = response.requestOptions;
-            requestOptions.headers['Cookie'] = cookies;
+            requestOptions.headers['Cookie'] = cookies
+                ?.map((cookie) => '${cookie.name}=${cookie.value}')
+                .join('; ');
             final newResponse = await dio.fetch(requestOptions);
-            newResponse.headers['Set-Cookie']
-                ?.addAll(cookies?.split('; ') as Iterable<String>);
-            // TODO: make this code cleaner
-            final cfClearance = cookies?.split('; ').firstWhereOrNull(
-                  (cookie) => cookie.startsWith('cf_clearance='),
-                );
+            newResponse.headers['set-cookie']?.addAll(
+              cookies?.map((cookie) => cookie.toString()).toList() ?? [],
+            );
+
+            final cfClearance = cookies
+                ?.firstWhereOrNull((cookie) => cookie.name == 'cf_clearance');
             if (cfClearance != null) {
               final authRepository =
                   getIt<Map<SupportedService, AuthRepository>>()[
                       SupportedService.filman];
               final account = authRepository?.getAccount();
               if (account != null) {
-                final cookies = account.cookies.map((cookie) {
-                  if (cookie.startsWith('cf_clearance=')) {
+                final updatedCookies = account.cookies.map((cookie) {
+                  if (cookie.name == 'cf_clearance') {
                     return cfClearance;
                   }
                   return cookie;
@@ -54,7 +68,7 @@ class FilmanDioFactory {
                 authRepository?.setAccount(AccountModel(
                   service: SupportedService.filman,
                   fields: account.fields,
-                  cookies: cookies,
+                  cookies: updatedCookies,
                 ));
               }
             }

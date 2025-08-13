@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:purevideo/core/services/webview_service.dart';
@@ -100,13 +101,15 @@ class EkinoAuthRepository implements AuthRepository {
   ) async {
     try {
       if (fields.containsKey('anonymous')) {
-        final reponse = await _dio.get(
+        final response = await _dio.get(
           '/',
         );
-        if (reponse.headers['set-cookie'] != null) {
-          final cookies = reponse.headers['set-cookie']!
-              .map((cookie) => cookie.split(';').first)
-              .toList();
+        if (response.headers['set-cookie'] != null) {
+          final cookies = response.headers['set-cookie']
+                  ?.map((header) => Cookie.fromSetCookieValue(header))
+                  .toList() ??
+              [];
+
           _account = AccountModel(
             fields: {
               'login': 'Gość',
@@ -138,9 +141,11 @@ class EkinoAuthRepository implements AuthRepository {
       try {
         final json = jsonDecode(webviewLogin!);
         if (json['success'] == true && json['cookies'] != null) {
-          final cookies = (json['cookies'] as String).split(';').toList();
+          final cookieList = (json['cookies'] as String).split(';');
 
-          debugPrint('Zalogowano pomyślnie: $cookies');
+          final cookies = cookieList
+              .map((header) => Cookie.fromSetCookieValue(header))
+              .toList();
 
           _account = AccountModel(
             fields: fields,
