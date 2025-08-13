@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:async';
+import 'dart:io';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
@@ -111,12 +112,15 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
         return authModel;
       }
 
-      final cookiesHeader = response.headers['set-cookie'];
+      if (response.headers['set-cookie'] != null) {
+        final cookies = response.headers['set-cookie']
+                ?.map((header) => Cookie.fromSetCookieValue(header))
+                .toList() ??
+            [];
 
-      if (cookiesHeader != null) {
         _account = AccountModel(
           fields: fields,
-          cookies: cookiesHeader,
+          cookies: cookies,
           service: SupportedService.obejrzyjto,
         );
         final authModel = AuthModel(
@@ -148,6 +152,26 @@ class ObejrzyjtoAuthRepository implements AuthRepository {
   @override
   AccountModel? getAccount() {
     return _account;
+  }
+
+  @override
+  Future<void> setAccount(AccountModel account) async {
+    _account = account;
+    _dio = ObejrzyjtoDioFactory.getDio(_account);
+
+    await SecureStorageService.saveServiceData(
+      SupportedService.obejrzyjto,
+      'account',
+      jsonEncode(account.toMap()),
+    );
+
+    _authController.add(
+      AuthModel(
+        service: SupportedService.obejrzyjto,
+        success: true,
+        account: _account,
+      ),
+    );
   }
 
   @override

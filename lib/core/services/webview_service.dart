@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io' as io;
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:html/dom.dart' as dom;
 import 'package:purevideo/core/utils/global_context.dart';
@@ -61,6 +63,103 @@ class WebViewService {
     return completer.future;
   }
 
+  Future<List<io.Cookie>?> getCfCookies(String url,
+      {List<io.Cookie>? initialCookies}) async {
+    final completer = Completer<List<io.Cookie>?>();
+
+    showDialog(
+        context: getIt<GlobalContext>().context,
+        builder: (context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            insetPadding: EdgeInsets.zero,
+            child: SizedBox(
+              width: MediaQuery.of(context).size.width,
+              height: MediaQuery.of(context).size.height,
+              child: InAppWebView(
+                initialUrlRequest: URLRequest(url: WebUri(url)),
+                initialSettings: InAppWebViewSettings(
+                  userAgent:
+                      'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+                  transparentBackground: true,
+                  supportZoom: false,
+                  disableContextMenu: true,
+                  disableHorizontalScroll: true,
+                  disableVerticalScroll: true,
+                  javaScriptEnabled: true,
+                  domStorageEnabled: true,
+                  clearCache: true,
+                  cacheEnabled: false,
+                  incognito: true,
+                  useShouldInterceptRequest: true,
+                ),
+                onWebViewCreated: (controller) async {
+                  await CookieManager.instance().deleteAllCookies();
+                  if (initialCookies != null && initialCookies.isNotEmpty) {
+                    for (io.Cookie cookie in initialCookies) {
+                      await CookieManager.instance().setCookie(
+                        name: cookie.name,
+                        url: WebUri(url),
+                        value: cookie.value,
+                        domain: cookie.domain,
+                      );
+                    }
+                  }
+                  await WebStorageManager.instance().deleteAllData();
+                },
+                shouldInterceptRequest: (controller, request) async {
+                  if (!request.url.rawValue.contains(url)) {
+                    return null;
+                  }
+                  final cookies = await CookieManager.instance()
+                      .getCookies(url: request.url);
+                  final cfClearance = cookies.firstWhereOrNull(
+                    (cookie) => cookie.name == 'cf_clearance',
+                  );
+                  if (cfClearance != null) {
+                    completer.complete(cookies.map((cookie) {
+                      return io.Cookie(
+                        cookie.name,
+                        cookie.value,
+                      );
+                    }).toList());
+                    if (context.mounted) Navigator.of(context).pop();
+                  }
+                  // }
+                  return null;
+                },
+                onLoadStop: (controller, url) async {
+                  try {
+                    final cookies =
+                        await CookieManager.instance().getCookies(url: url!);
+                    final cfClearance = cookies.firstWhereOrNull(
+                      (cookie) => cookie.name == 'cf_clearance',
+                    );
+                    if (cfClearance != null && !completer.isCompleted) {
+                      completer.complete(cookies.map((cookie) {
+                        return io.Cookie(
+                          cookie.name,
+                          cookie.value,
+                        );
+                      }).toList());
+                      if (context.mounted) Navigator.of(context).pop();
+                    }
+                  } catch (e) {
+                    if (context.mounted) Navigator.of(context).pop();
+                    // if (context.mounted) {
+                    //   _showErrorDialog(context, controller, completer);
+                    // }
+                  }
+                },
+              ),
+            ),
+          );
+        });
+
+    return completer.future;
+  }
+
   Widget _buildWebViewDialog(BuildContext context, String url, String jsCode,
       Completer<String?> completer) {
     return Dialog(
@@ -73,6 +172,8 @@ class WebViewService {
         child: InAppWebView(
           initialUrlRequest: URLRequest(url: WebUri(url)),
           initialSettings: InAppWebViewSettings(
+            userAgent:
+                'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
             transparentBackground: true,
             supportZoom: false,
             disableContextMenu: true,

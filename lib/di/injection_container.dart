@@ -28,7 +28,6 @@ void setupInjection() {
   getIt.registerSingleton<VideoHostRegistry>(videoHostRegistry);
   VideoHostsContainer.registerVideoScrapers(videoHostRegistry);
 
-  // getIt.registerFactory<ReCaptchaBloc>(() => ReCaptchaBloc());
   getIt.registerFactory<CaptchaService>(() => CaptchaService());
   getIt.registerFactory<WebViewService>(() => WebViewService());
 

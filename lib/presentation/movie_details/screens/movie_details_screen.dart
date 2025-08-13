@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_bloc.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_event.dart';
@@ -179,6 +180,18 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: FastCachedImage(
                                   url: movie.imageUrl,
+                                  headers: {
+                                    'User-Agent':
+                                        'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+                                    'Cookie': getIt<
+                                                    Map<SupportedService,
+                                                        AuthRepository>>()[
+                                                movie.service]
+                                            ?.getAccount()
+                                            ?.cookies
+                                            .join('; ') ??
+                                        '',
+                                  },
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Container(
