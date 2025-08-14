@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 
 class MergeService {

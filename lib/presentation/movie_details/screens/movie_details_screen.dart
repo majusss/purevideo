@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/core/services/watched_service.dart';
-import 'package:purevideo/core/utils/supported_enum.dart';
-import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_bloc.dart';
@@ -244,31 +242,31 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                 const SizedBox(height: 24),
                 if (state.isSeries && state.seasons.isNotEmpty)
                   _buildSeriesSection(context, state),
-                for (final service in movie.services) ...[
-                  Text(
-                      'Serwis: ${service.service.displayName} - ${service.title.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(RegExp(r'\s+'), ' ').trim()} - ${service.url}',
-                      style: textTheme.titleSmall),
-                  const SizedBox(height: 6),
-                  for (final link in service.videoUrls ?? [])
-                    Text(
-                      link.url,
-                      style: textTheme.bodySmall?.copyWith(
-                        color: colorScheme.primary,
-                      ),
-                    ),
-                  const Divider()
-                ],
-                Text('Directs', style: textTheme.titleSmall),
-                const SizedBox(height: 6),
-                for (final VideoSource link in movie.directUrls ?? []) ...[
-                  Text(
-                    '${link.host}: ${link.url}',
-                    style: textTheme.bodySmall?.copyWith(
-                      color: colorScheme.primary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                ]
+                // for (final service in movie.services) ...[
+                //   Text(
+                //       'Serwis: ${service.service.displayName} - ${service.title.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(RegExp(r'\s+'), ' ').trim()} - ${service.url}',
+                //       style: textTheme.titleSmall),
+                //   const SizedBox(height: 6),
+                //   for (final link in service.videoUrls ?? [])
+                //     Text(
+                //       link.url,
+                //       style: textTheme.bodySmall?.copyWith(
+                //         color: colorScheme.primary,
+                //       ),
+                //     ),
+                //   const Divider()
+                // ],
+                // Text('Directs', style: textTheme.titleSmall),
+                // const SizedBox(height: 6),
+                // for (final VideoSource link in movie.directUrls ?? []) ...[
+                //   Text(
+                //     '${link.host}: ${link.url}',
+                //     style: textTheme.bodySmall?.copyWith(
+                //       color: colorScheme.primary,
+                //     ),
+                //   ),
+                //   const SizedBox(height: 4),
+                // ]
               ]),
             ),
           ),
@@ -381,7 +379,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                     items: state.seasons.asMap().entries.map((entry) {
                       return DropdownMenuItem<int>(
                         value: entry.key,
-                        child: Text(entry.value.name),
+                        child: Text('Sezon ${entry.value.number}'),
                       );
                     }).toList(),
                     onChanged: (value) {
@@ -397,7 +395,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
             else if (state.seasons.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(right: 12.0),
-                child: Text(state.seasons.first.name,
+                child: Text('Sezon ${state.seasons.first.number}',
                     style: textTheme.titleMedium),
               ),
           ],

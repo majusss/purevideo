@@ -188,7 +188,6 @@ class EkinoMovieRepository implements MovieRepository {
           }
 
           seasons.add(SeasonModel(
-            name: seasonName,
             number: seasonNumber,
             episodes: episodes.reversed.toList(),
           ));

@@ -143,21 +143,18 @@ class SeasonModelAdapter extends TypeAdapter<SeasonModel> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return SeasonModel(
-      name: fields[0] as String,
-      number: fields[1] as int,
-      episodes: (fields[2] as List).cast<EpisodeModel>(),
+      number: fields[0] as int,
+      episodes: (fields[1] as List).cast<EpisodeModel>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, SeasonModel obj) {
     writer
-      ..writeByte(3)
-      ..writeByte(0)
-      ..write(obj.name)
-      ..writeByte(1)
-      ..write(obj.number)
       ..writeByte(2)
+      ..writeByte(0)
+      ..write(obj.number)
+      ..writeByte(1)
       ..write(obj.episodes);
   }
 
@@ -198,7 +195,7 @@ class ServiceMovieDetailsModelAdapter
   @override
   void write(BinaryWriter writer, ServiceMovieDetailsModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(8)
       ..writeByte(0)
       ..write(obj.service)
       ..writeByte(1)

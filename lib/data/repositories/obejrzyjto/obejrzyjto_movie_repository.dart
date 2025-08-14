@@ -117,7 +117,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
         ));
       }
 
-      seasons.add(SeasonModel(name: 'Sezon $i', number: i, episodes: episodes));
+      seasons.add(SeasonModel(number: i, episodes: episodes));
     }
 
     return movie.copyWith(

@@ -32,9 +32,9 @@ void setupInjection() {
   getIt.registerFactory<CaptchaService>(() => CaptchaService());
   getIt.registerFactory<WebViewService>(() => WebViewService());
 
-  getIt.registerSingleton<MergeService>(MergeService());
   getIt.registerSingleton<VideoSourceRepository>(VideoSourceRepository());
 
+  getIt.registerSingleton<MergeService>(MergeService());
   getIt.registerSingleton<SettingsService>(SettingsService());
   getIt.registerSingleton<WatchedService>(WatchedService());
 

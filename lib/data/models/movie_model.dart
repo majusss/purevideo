@@ -101,16 +101,12 @@ class EpisodeModel {
 @HiveType(typeId: 4)
 class SeasonModel {
   @HiveField(0)
-  final String name;
-
-  @HiveField(1)
   final int number;
 
-  @HiveField(2)
+  @HiveField(1)
   final List<EpisodeModel> episodes;
 
-  SeasonModel(
-      {required this.name, required this.number, required this.episodes});
+  SeasonModel({required this.number, required this.episodes});
 }
 
 @HiveType(typeId: 7)
@@ -210,24 +206,52 @@ class MovieDetailsModel {
 
   bool get isSeries => services.first.isSeries;
 
-  // TODO: combine seasons from all services
-  List<SeasonModel>? get seasons => services.first.seasons;
+  final List<SeasonModel>? seasons;
 
-  const MovieDetailsModel({required this.services, this.directUrls});
+  static List<SeasonModel> _combineSeasons(
+      List<ServiceMovieDetailsModel> services) {
+    final Map<int, SeasonModel> combinedSeasons = {};
+
+    for (final service in services) {
+      if (service.seasons != null) {
+        for (final season in service.seasons!) {
+          if (combinedSeasons.containsKey(season.number)) {
+            final existingSeason = combinedSeasons[season.number]!;
+            final allEpisodes = <EpisodeModel>[
+              ...existingSeason.episodes,
+              ...season.episodes,
+            ];
+
+            final Map<int, EpisodeModel> uniqueEpisodes = {};
+            for (final episode in allEpisodes) {
+              uniqueEpisodes[episode.number] = episode;
+            }
+
+            combinedSeasons[season.number] = SeasonModel(
+              number: season.number,
+              episodes: uniqueEpisodes.values.toList()
+                ..sort((a, b) => a.number.compareTo(b.number)),
+            );
+          } else {
+            combinedSeasons[season.number] = SeasonModel(
+              number: season.number,
+              episodes: season.episodes,
+            );
+          }
+        }
+      }
+    }
+
+    return combinedSeasons.values.toList()
+      ..sort((a, b) => a.number.compareTo(b.number));
+  }
+
+  MovieDetailsModel({required this.services, this.directUrls})
+      : seasons = _combineSeasons(services);
 
   MovieDetailsModel copyWith({
     List<ServiceMovieDetailsModel>? services,
-    String? url,
-    String? title,
-    String? description,
-    String? imageUrl,
-    List<HostLink>? videoUrls,
     List<VideoSource>? directUrls,
-    String? year,
-    List<String>? genres,
-    List<String>? countries,
-    bool? isSeries,
-    List<SeasonModel>? seasons,
   }) {
     return MovieDetailsModel(
       services: services ?? this.services,

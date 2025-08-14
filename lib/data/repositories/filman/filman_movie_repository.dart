@@ -148,7 +148,6 @@ class FilmanMovieRepository implements MovieRepository {
       final seasons = <SeasonModel>[];
       for (int i = 0; i < episodeList.children.length; i++) {
         final seasonElement = episodeList.children[i];
-        final seasonName = seasonElement.children.first.text.trim();
         final episodes = <EpisodeModel>[];
 
         for (int j = 0; j < seasonElement.children.last.children.length; j++) {
@@ -171,7 +170,6 @@ class FilmanMovieRepository implements MovieRepository {
         }
 
         seasons.add(SeasonModel(
-            name: seasonName,
             number: episodeList.children.length - i,
             episodes: episodes.toList().reversed.toList()));
       }
