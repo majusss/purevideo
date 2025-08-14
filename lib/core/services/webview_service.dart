@@ -117,7 +117,7 @@ class WebViewService {
                   final cfClearance = cookies.firstWhereOrNull(
                     (cookie) => cookie.name == 'cf_clearance',
                   );
-                  if (cfClearance != null) {
+                  if (cfClearance != null && !completer.isCompleted) {
                     completer.complete(cookies.map((cookie) {
                       return io.Cookie(
                         cookie.name,
@@ -126,7 +126,6 @@ class WebViewService {
                     }).toList());
                     if (context.mounted) Navigator.of(context).pop();
                   }
-                  // }
                   return null;
                 },
                 onLoadStop: (controller, url) async {
