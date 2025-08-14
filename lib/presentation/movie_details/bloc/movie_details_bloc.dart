@@ -1,14 +1,15 @@
 import 'dart:async';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_event.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_state.dart';
-import 'package:firebase_analytics/firebase_analytics.dart';
 
 class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   final Map<SupportedService, MovieRepository> _movieRepositories = getIt();
@@ -26,27 +27,35 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   Future<void> _onLoadMovieDetails(
       LoadMovieDetails event, Emitter<MovieDetailsState> emit) async {
     try {
-      final authRepository = _authRepositories[event.service];
-      if (authRepository == null) {
-        throw Exception('Brak obsługi serwisu ${event.service}');
+      final services = <ServiceMovieDetailsModel>[];
+
+      for (final serivceMovie in event.movie.services) {
+        final authRepository = _authRepositories[serivceMovie.service];
+        if (authRepository == null) {
+          throw Exception('Brak obsługi serwisu ${serivceMovie.service}');
+        }
+
+        final account = authRepository.getAccount();
+        if (account == null) {
+          return emit(state.copyWith(
+            errorMessage:
+                'Nie jesteś zalogowany do ${serivceMovie.service.displayName}',
+          ));
+        }
+
+        final movieRepository = _movieRepositories[serivceMovie.service];
+        if (movieRepository == null) {
+          throw Exception('Brak obsługi serwisu ${serivceMovie.service}');
+        }
+
+        final movie = await movieRepository.getMovieDetails(serivceMovie.url);
+        services.add(movie);
       }
 
-      final account = authRepository.getAccount();
-      if (account == null) {
-        return emit(state.copyWith(
-          errorMessage: 'Nie jesteś zalogowany do ${event.service.displayName}',
-        ));
-      }
-
-      final movieRepository = _movieRepositories[event.service];
-      if (movieRepository == null) {
-        throw Exception('Brak obsługi serwisu ${event.service}');
-      }
-
-      final movie = await movieRepository.getMovieDetails(event.url);
+      final movie = MovieDetailsModel(services: services);
 
       FirebaseAnalytics.instance
-          .logSelectContent(contentType: 'video', itemId: movie.url);
+          .logSelectContent(contentType: 'video', itemId: movie.title);
 
       final watched = _watchedService.getByMovie(movie);
 
@@ -69,7 +78,7 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
       }
 
       if (!movie.isSeries) {
-        add(ScrapeVideoUrls(movie: movie, service: event.service));
+        add(ScrapeVideoUrls(movie: movie));
       }
     } catch (e) {
       emit(state.copyWith(

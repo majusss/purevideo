@@ -31,7 +31,7 @@ class EkinoSearchRepository extends SearchRepository {
   }
 
   @override
-  Future<List<MovieModel>> searchMovies(String query) async {
+  Future<List<ServiceMovieModel>> searchMovies(String query) async {
     if (query.isEmpty) {
       return [];
     }
@@ -45,7 +45,7 @@ class EkinoSearchRepository extends SearchRepository {
 
     final document = html.parse(response.data);
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
 
     document.querySelectorAll('.movies-list-item').forEach((movieElement) {
       final coverElement = movieElement.querySelector('.cover-list a');
@@ -63,19 +63,14 @@ class EkinoSearchRepository extends SearchRepository {
       final title = titleElement.text.trim();
       if (title.isEmpty) return;
 
-      String cleanTitle = title;
-      if (title.contains(' - HD')) {
-        cleanTitle = title.split(' - HD').first.trim();
-      } else if (title.contains(' - CAM')) {
-        cleanTitle = title.split(' - CAM').first.trim();
-      }
+      final cleanTitle = title.split(' - ').first.trim();
 
       String fullImageUrl = imageUrl;
       if (imageUrl.isNotEmpty && imageUrl.startsWith('/')) {
         fullImageUrl = 'https://ekino-tv.pl$imageUrl';
       }
 
-      movies.add(MovieModel(
+      movies.add(ServiceMovieModel(
         service: SupportedService.ekino,
         title: cleanTitle,
         imageUrl: fullImageUrl,

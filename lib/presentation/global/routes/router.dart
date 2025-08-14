@@ -57,19 +57,12 @@ final GoRouter router = GoRouter(
       },
     ),
     GoRoute(
-      path: '/movie/:service/:url',
+      path: '/movie/:title',
       name: 'movie_details',
       pageBuilder: (context, state) {
-        final service = SupportedService.values.firstWhere(
-          (e) => e.name == state.pathParameters['service'],
-          orElse: () => SupportedService.values.first,
-        );
-        final url = state.pathParameters['url'] ?? '';
-
         return NoTransitionPage(
           child: MovieDetailsScreen(
-            service: service,
-            url: url,
+            movie: state.extra as MovieModel,
           ),
         );
       },
@@ -89,7 +82,7 @@ final GoRouter router = GoRouter(
         return NoTransitionPage(
           child: PlayerScreen(
             key: ValueKey(
-              '${movie.url}-${seasonIndex ?? 0}-${episodeIndex ?? 0}',
+              '${movie.title}-${seasonIndex ?? 0}-${episodeIndex ?? 0}',
             ),
             movie: movie,
             seasonIndex: seasonIndex,

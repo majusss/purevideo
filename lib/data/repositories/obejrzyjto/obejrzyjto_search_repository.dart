@@ -31,7 +31,7 @@ class ObejrzyjtoSearchRepository extends SearchRepository {
   }
 
   @override
-  Future<List<MovieModel>> searchMovies(String query) async {
+  Future<List<ServiceMovieModel>> searchMovies(String query) async {
     if (query.isEmpty) {
       return [];
     }
@@ -48,7 +48,7 @@ class ObejrzyjtoSearchRepository extends SearchRepository {
       return [];
     }
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
     for (final movieData in results) {
       if (movieData == null) continue;
 
@@ -73,7 +73,7 @@ class ObejrzyjtoSearchRepository extends SearchRepository {
         continue;
       }
 
-      movies.add(MovieModel(
+      movies.add(ServiceMovieModel(
           service: SupportedService.obejrzyjto,
           title: title,
           imageUrl: imageUrl,

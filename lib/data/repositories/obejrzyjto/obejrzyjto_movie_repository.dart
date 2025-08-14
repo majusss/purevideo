@@ -64,8 +64,8 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     );
   }
 
-  Future<MovieDetailsModel> scrapeSeasons(
-      MovieDetailsModel movie, int movieId) async {
+  Future<ServiceMovieDetailsModel> scrapeSeasons(
+      ServiceMovieDetailsModel movie, int movieId) async {
     await _prepareDio();
 
     final response = await _dio!.get('/api/v1/titles/$movieId/seasons',
@@ -117,7 +117,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
         ));
       }
 
-      seasons.add(SeasonModel(name: 'Sezon $i', number: i, episodes: episodes));
+      seasons.add(SeasonModel(number: i, episodes: episodes));
     }
 
     return movie.copyWith(
@@ -126,7 +126,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<MovieDetailsModel> getMovieDetails(String url) async {
+  Future<ServiceMovieDetailsModel> getMovieDetails(String url) async {
     await _prepareDio();
 
     final response = await _dio!.get(url);
@@ -199,7 +199,7 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
     return videoUrls;
   }
 
-  MovieDetailsModel _buildMovieDetails(
+  ServiceMovieDetailsModel _buildMovieDetails(
       String url, Map<String, dynamic> details, List<HostLink> videoUrls) {
     final title = details['name'] as String?;
     if (title == null || title.isEmpty) {
@@ -211,21 +211,18 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
       throw Exception('Brak opisu filmu w danych serwera.');
     }
 
-    return MovieDetailsModel(
+    return ServiceMovieDetailsModel(
         service: SupportedService.obejrzyjto,
         url: url,
         title: title,
         description: description,
         imageUrl: details['poster'] ?? '',
-        year: details['year'] ?? '',
-        genres: [],
-        countries: [],
         isSeries: details['is_series'].toString() == 'true',
         videoUrls: videoUrls);
   }
 
   @override
-  Future<List<MovieModel>> getMovies() async {
+  Future<List<ServiceMovieModel>> getMovies() async {
     await _prepareDio();
 
     final response = await _dio!.get('/');
@@ -233,21 +230,22 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
 
     return bootstrapData != null
         ? _parseMoviesFromData(bootstrapData)
-        : <MovieModel>[];
+        : <ServiceMovieModel>[];
   }
 
-  List<MovieModel> _parseMoviesFromData(Map<String, dynamic> data) {
+  List<ServiceMovieModel> _parseMoviesFromData(Map<String, dynamic> data) {
     final loaders = data['loaders']?['channelPage']?['channel']?['content']
         ?['data'] as List?;
-    if (loaders == null) return <MovieModel>[];
+    if (loaders == null) return <ServiceMovieModel>[];
 
     return loaders
         .expand((loader) => _parseMoviesFromLoader(loader))
-        .whereType<MovieModel>()
+        .whereType<ServiceMovieModel>()
         .toList();
   }
 
-  Iterable<MovieModel?> _parseMoviesFromLoader(Map<String, dynamic> loader) {
+  Iterable<ServiceMovieModel?> _parseMoviesFromLoader(
+      Map<String, dynamic> loader) {
     final loaderName = loader['name'] as String?;
     final contentData = loader['content']?['data'] as List?;
 
@@ -256,14 +254,14 @@ class ObejrzyjtoMovieRepository implements MovieRepository {
         [];
   }
 
-  MovieModel? _parseMovie(Map<String, dynamic> data, String? category) {
+  ServiceMovieModel? _parseMovie(Map<String, dynamic> data, String? category) {
     final name = data['name'] as String?;
     final poster = data['poster'] as String?;
     final primaryVideoId = data['primary_video']?['id'];
 
     if (name == null || primaryVideoId == null) return null;
 
-    return MovieModel(
+    return ServiceMovieModel(
       service: SupportedService.obejrzyjto,
       title: name,
       imageUrl: poster ?? '',

@@ -105,7 +105,7 @@ class EkinoMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<MovieDetailsModel> getMovieDetails(String url) async {
+  Future<ServiceMovieDetailsModel> getMovieDetails(String url) async {
     await _prepareDio();
 
     final response = await _dio!.get(url);
@@ -114,12 +114,7 @@ class EkinoMovieRepository implements MovieRepository {
     final titleElement = document.querySelector('h1.title');
     final title = titleElement?.text.trim() ?? 'Brak tytułu';
 
-    String cleanTitle = title;
-    if (title.contains(' - HD')) {
-      cleanTitle = title.split(' - HD').first.trim();
-    } else if (title.contains(' - CAM')) {
-      cleanTitle = title.split(' - CAM').first.trim();
-    }
+    final cleanTitle = title.split(' - ').first.trim();
 
     final descriptionElement = document.querySelector('.descriptionMovie');
     String description = descriptionElement?.text.trim() ?? '';
@@ -193,22 +188,18 @@ class EkinoMovieRepository implements MovieRepository {
           }
 
           seasons.add(SeasonModel(
-            name: seasonName,
             number: seasonNumber,
             episodes: episodes.reversed.toList(),
           ));
         }
       }
 
-      return MovieDetailsModel(
+      return ServiceMovieDetailsModel(
         service: SupportedService.ekino,
         url: url,
         title: cleanTitle,
         description: description,
         imageUrl: imageUrl,
-        year: '',
-        genres: [],
-        countries: [],
         isSeries: true,
         seasons: seasons.reversed.toList(),
       );
@@ -216,15 +207,12 @@ class EkinoMovieRepository implements MovieRepository {
 
     final videoUrls = await _extractHostLinksFromDocument(document);
 
-    final movieModel = MovieDetailsModel(
+    final movieModel = ServiceMovieDetailsModel(
       service: SupportedService.ekino,
       url: url,
       title: cleanTitle,
       description: description,
       imageUrl: imageUrl,
-      year: '',
-      genres: [],
-      countries: [],
       isSeries: false,
       videoUrls: videoUrls,
     );
@@ -233,13 +221,13 @@ class EkinoMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<List<MovieModel>> getMovies() async {
+  Future<List<ServiceMovieModel>> getMovies() async {
     await _prepareDio();
 
     final response = await _dio!.get('/');
     final document = html.parse(response.data);
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
 
     final movieSections = document.querySelectorAll('.mostPopular');
 
@@ -285,7 +273,7 @@ class EkinoMovieRepository implements MovieRepository {
           cleanTitle = title.split(' - CAM').first.trim();
         }
 
-        final movie = MovieModel(
+        final movie = ServiceMovieModel(
           service: SupportedService.ekino,
           title: cleanTitle,
           imageUrl: imageUrl,

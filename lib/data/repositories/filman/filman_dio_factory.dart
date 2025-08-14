@@ -34,6 +34,7 @@ class FilmanDioFactory {
                 (response.requestOptions.headers['Cookie'] as String?)
                         ?.split(';')
                         .map((cookie) => Cookie.fromSetCookieValue(cookie))
+                        .where((cookie) => cookie.name != 'cf_clearance')
                         .toList() ??
                     [];
 

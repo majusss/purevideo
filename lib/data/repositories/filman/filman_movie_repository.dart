@@ -69,13 +69,13 @@ class FilmanMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<List<MovieModel>> getMovies() async {
+  Future<List<ServiceMovieModel>> getMovies() async {
     await _prepareDio();
 
     final response = await _dio!.get('/');
     final document = html.parse(response.data);
 
-    final movies = <MovieModel>[];
+    final movies = <ServiceMovieModel>[];
 
     for (final list in document.querySelectorAll('div[id=item-list]')) {
       for (final item in list.children) {
@@ -95,7 +95,7 @@ class FilmanMovieRepository implements MovieRepository {
         final category =
             list.parent?.querySelector('h3')?.text.trim() ?? 'INNE';
 
-        final movie = MovieModel(
+        final movie = ServiceMovieModel(
           service: SupportedService.filman,
           title: title,
           imageUrl: imageUrl,
@@ -126,7 +126,7 @@ class FilmanMovieRepository implements MovieRepository {
   }
 
   @override
-  Future<MovieDetailsModel> getMovieDetails(String url) async {
+  Future<ServiceMovieDetailsModel> getMovieDetails(String url) async {
     await _prepareDio();
 
     final response = await _dio!.get(url);
@@ -141,41 +141,6 @@ class FilmanMovieRepository implements MovieRepository {
     final imageUrl =
         document.querySelector('#single-poster img')?.attributes['src'] ?? '';
 
-    String year = '';
-    List<String> genres = [];
-    List<String> countries = [];
-
-    final infoBox = document.querySelector('.info');
-    if (infoBox != null) {
-      for (final ulElement in infoBox.children) {
-        if (ulElement.children.isEmpty) continue;
-
-        final label = ulElement.children.first.text.trim();
-
-        switch (label) {
-          case 'Rok:':
-          case 'Premiera:':
-            if (ulElement.children.length > 1) {
-              year = ulElement.children[1].text.trim();
-            }
-            break;
-          case 'Gatunek:':
-          case 'Kategoria:':
-            genres = ulElement
-                .querySelectorAll('li a')
-                .map((e) => e.text.trim())
-                .toList();
-            break;
-          case 'Kraj:':
-            countries = ulElement
-                .querySelectorAll('li a')
-                .map((e) => e.text.trim())
-                .toList();
-            break;
-        }
-      }
-    }
-
     final episodeList = document.querySelector('#episode-list');
     final isSeries = episodeList != null;
 
@@ -183,7 +148,6 @@ class FilmanMovieRepository implements MovieRepository {
       final seasons = <SeasonModel>[];
       for (int i = 0; i < episodeList.children.length; i++) {
         final seasonElement = episodeList.children[i];
-        final seasonName = seasonElement.children.first.text.trim();
         final episodes = <EpisodeModel>[];
 
         for (int j = 0; j < seasonElement.children.last.children.length; j++) {
@@ -206,20 +170,16 @@ class FilmanMovieRepository implements MovieRepository {
         }
 
         seasons.add(SeasonModel(
-            name: seasonName,
             number: episodeList.children.length - i,
             episodes: episodes.toList().reversed.toList()));
       }
 
-      return MovieDetailsModel(
+      return ServiceMovieDetailsModel(
         service: SupportedService.filman,
         url: url,
         title: title,
         description: description,
         imageUrl: imageUrl,
-        year: year,
-        genres: genres,
-        countries: countries,
         isSeries: isSeries,
         seasons: seasons.toList().reversed.toList(),
       );
@@ -227,15 +187,12 @@ class FilmanMovieRepository implements MovieRepository {
 
     final videoUrls = _extractHostLinksFromDocument(document);
 
-    final movieModel = MovieDetailsModel(
+    final movieModel = ServiceMovieDetailsModel(
       service: SupportedService.filman,
       url: url,
       title: title,
       description: description,
       imageUrl: imageUrl,
-      year: year,
-      genres: genres,
-      countries: countries,
       isSeries: isSeries,
       videoUrls: videoUrls,
     );

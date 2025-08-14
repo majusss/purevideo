@@ -27,7 +27,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
   final VideoSourceRepository _videoSourceRepository =
       getIt<VideoSourceRepository>();
-  late MovieRepository _movieRepository;
+  final Map<SupportedService, MovieRepository> _movieRepositories =
+      getIt<Map<SupportedService, MovieRepository>>();
 
   MovieDetailsModel? _movie;
   int? _seasonIndex;
@@ -99,9 +100,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _seasonIndex = event.seasonIndex;
     _episodeIndex = event.episodeIndex;
 
-    _movieRepository =
-        getIt<Map<SupportedService, MovieRepository>>()[event.movie.service]!;
-
     _initMediaKit();
 
     emit(state.copyWith(
@@ -127,28 +125,38 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       MovieDetailsModel movieDetails;
 
       if (_seasonIndex != null && _episodeIndex != null) {
-        final episode =
-            _movie!.seasons![_seasonIndex!].episodes[_episodeIndex!];
-        final episodeWithHosts =
-            await _movieRepository.getEpisodeHosts(episode);
+        final episodes = <EpisodeModel>[];
+        for (final service in _movie!.services) {
+          final movieRepository = _movieRepositories[service.service];
+          if (movieRepository == null) {
+            continue;
+          }
 
+          final episode =
+              service.seasons![_seasonIndex!].episodes[_episodeIndex!];
+          final episodeWithHosts =
+              await movieRepository.getEpisodeHosts(episode);
+          episodes.add(episodeWithHosts);
+        }
+
+        // this is dummy af but this system works better from films
         final tempModel = MovieDetailsModel(
-          service: _movie!.service,
-          url: episode.url,
-          title: episode.title,
-          description: '',
-          imageUrl: _movie!.imageUrl,
-          year: _movie!.year,
-          genres: _movie!.genres,
-          countries: _movie!.countries,
-          isSeries: true,
-          videoUrls: episodeWithHosts.videoUrls,
+          services: [
+            ServiceMovieDetailsModel(
+                service: SupportedService.values.first,
+                url: '',
+                title: '',
+                description: '',
+                imageUrl: '',
+                isSeries: true,
+                videoUrls: episodes.expand((e) => e.videoUrls!).toList()),
+          ],
         );
 
         movieDetails = await _videoSourceRepository.scrapeVideoUrls(tempModel);
       } else {
         movieDetails = _movie!;
-        // await _videoSourceRepository.scrapeVideoUrls(_movie!); we already done this in movie details block
+        // await _videoSourceRepository.scrapeVideoUrls(_movie!); we already done this in movie details bloc
       }
 
       if (movieDetails.directUrls != null &&
