@@ -51,8 +51,14 @@ class FilmanSearchRepository implements SearchRepository {
         .querySelectorAll('.col-xs-6.col-sm-3.col-lg-2')
         .forEach((final filmDOM) {
       final poster = filmDOM.querySelector('.poster');
-      final title =
-          filmDOM.querySelector('.film_title')?.text.trim() ?? 'Brak danych';
+      final title = filmDOM
+              .querySelector('.film_title')
+              ?.text
+              .trim()
+              .split('/')
+              .first
+              .trim() ??
+          'Brak danych';
       final imageUrl =
           poster?.querySelector('img')?.attributes['src']?.trim() ?? '';
       final link =

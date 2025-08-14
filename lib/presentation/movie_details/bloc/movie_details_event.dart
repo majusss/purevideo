@@ -23,12 +23,11 @@ class LoadMovieDetails extends MovieDetailsEvent {
 
 class ScrapeVideoUrls extends MovieDetailsEvent {
   final MovieDetailsModel movie;
-  final SupportedService service;
 
-  const ScrapeVideoUrls({required this.movie, required this.service});
+  const ScrapeVideoUrls({required this.movie});
 
   @override
-  List<Object> get props => [movie, service];
+  List<Object> get props => [movie];
 }
 
 class SelectSeason extends MovieDetailsEvent {

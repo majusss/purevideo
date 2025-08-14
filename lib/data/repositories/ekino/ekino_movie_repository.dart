@@ -114,12 +114,7 @@ class EkinoMovieRepository implements MovieRepository {
     final titleElement = document.querySelector('h1.title');
     final title = titleElement?.text.trim() ?? 'Brak tytułu';
 
-    String cleanTitle = title;
-    if (title.contains(' - HD')) {
-      cleanTitle = title.split(' - HD').first.trim();
-    } else if (title.contains(' - CAM')) {
-      cleanTitle = title.split(' - CAM').first.trim();
-    }
+    final cleanTitle = title.split(' - ').first.trim();
 
     final descriptionElement = document.querySelector('.descriptionMovie');
     String description = descriptionElement?.text.trim() ?? '';

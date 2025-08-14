@@ -2,6 +2,8 @@ import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 import 'package:purevideo/data/models/link_model.dart';
+import 'package:purevideo/data/repositories/auth_repository.dart';
+import 'package:purevideo/di/injection_container.dart';
 
 part 'movie_model.g.dart';
 
@@ -39,6 +41,17 @@ class MovieModel {
   get title => services.first.title;
 
   get imageUrl => services.first.imageUrl;
+
+  Map<String, String> get imageHeaders => {
+        'User-Agent':
+            'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+        'Cookie': getIt<Map<SupportedService, AuthRepository>>()[
+                    services.first.service]
+                ?.getAccount()
+                ?.cookies
+                .join('; ') ??
+            '',
+      };
 
   const MovieModel({
     required this.services,
@@ -176,6 +189,17 @@ class MovieDetailsModel {
   String get title => services.first.title;
 
   String get description => services.first.description;
+
+  Map<String, String> get imageHeaders => {
+        'User-Agent':
+            'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+        'Cookie': getIt<Map<SupportedService, AuthRepository>>()[
+                    services.first.service]
+                ?.getAccount()
+                ?.cookies
+                .join('; ') ??
+            '',
+      };
 
   String get imageUrl => services.first.imageUrl;
 

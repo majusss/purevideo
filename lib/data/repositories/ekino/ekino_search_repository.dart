@@ -63,12 +63,7 @@ class EkinoSearchRepository extends SearchRepository {
       final title = titleElement.text.trim();
       if (title.isEmpty) return;
 
-      String cleanTitle = title;
-      if (title.contains(' - HD')) {
-        cleanTitle = title.split(' - HD').first.trim();
-      } else if (title.contains(' - CAM')) {
-        cleanTitle = title.split(' - CAM').first.trim();
-      }
+      final cleanTitle = title.split(' - ').first.trim();
 
       String fullImageUrl = imageUrl;
       if (imageUrl.isNotEmpty && imageUrl.startsWith('/')) {

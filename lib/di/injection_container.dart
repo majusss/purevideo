@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:purevideo/core/services/merg_service.dart';
 import 'package:purevideo/core/services/settings_service.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/services/captcha_service.dart';
@@ -31,6 +32,7 @@ void setupInjection() {
   getIt.registerFactory<CaptchaService>(() => CaptchaService());
   getIt.registerFactory<WebViewService>(() => WebViewService());
 
+  getIt.registerSingleton<MergeService>(MergeService());
   getIt.registerSingleton<VideoSourceRepository>(VideoSourceRepository());
 
   getIt.registerSingleton<SettingsService>(SettingsService());

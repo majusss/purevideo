@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:collection/collection.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/models/watched_model.dart';
@@ -34,12 +35,14 @@ class WatchedService {
   }
 
   WatchedMovieModel? getByMovie(MovieDetailsModel movie) {
-    return box.get(movie.url);
+    return box.values.firstWhereIndexedOrNull((index, boxElement) => movie
+        .services
+        .any((element) => boxElement.movie.services.contains(element)));
   }
 
   WatchedEpisodeModel? getByEpisode(
       MovieDetailsModel movie, EpisodeModel episode) {
-    final watchedMovie = box.get(movie.url);
+    final watchedMovie = getByMovie(movie);
     return watchedMovie?.getEpisodeByUrl(episode.url);
   }
 
@@ -49,7 +52,7 @@ class WatchedService {
       watchedTime: watchedTime,
       watchedAt: DateTime.now(),
     );
-    box.put(movie.url, watchedMovie);
+    box.add(watchedMovie);
     _notifyListeners();
   }
 
@@ -59,9 +62,9 @@ class WatchedService {
     EpisodeModel episode,
     int watchedTime,
   ) {
-    var watchedMovie = box.get(movie.url)?.copyWith(
-              watchedAt: DateTime.now(),
-            ) ??
+    var watchedMovie = getByMovie(movie)?.copyWith(
+          watchedAt: DateTime.now(),
+        ) ??
         WatchedMovieModel(
           movie: movie,
           watchedTime: 0,
@@ -78,7 +81,7 @@ class WatchedService {
     watchedMovie.episodes!.add(
         WatchedSeasonEpisode(season: season, watchedEpisode: watchedEpisode));
 
-    box.put(movie.url, watchedMovie);
+    box.add(watchedMovie);
     _notifyListeners();
   }
 }

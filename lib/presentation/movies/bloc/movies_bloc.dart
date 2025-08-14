@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:purevideo/core/services/merg_service.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -62,19 +63,23 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
         emit(const MoviesError('Zaloguj się aby zobaczyć filmy'));
         return;
       }
-
+      // need combine here
       _movies.addAll(_watchedService
           .getAll()
           .sorted(
             (a, b) => b.watchedAt.compareTo(a.watchedAt),
           )
           .map((watched) => MovieModel(
-                service: watched.movie.service,
-                title: watched.movie.title,
-                imageUrl: watched.movie.imageUrl,
-                url: watched.movie.url,
-                category: 'Oglądane',
+                services: watched.movie.services
+                    .map((e) => ServiceMovieModel(
+                        service: e.service,
+                        url: e.url,
+                        title: e.title,
+                        imageUrl: e.imageUrl))
+                    .toList(),
               )));
+
+      final merge = getIt<MergeService>();
 
       for (final entry in _repositories.entries) {
         final service = entry.key;
@@ -83,9 +88,12 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
         final account = authRepo?.getAccount();
 
         if (account != null) {
-          _movies.addAll(await repository.getMovies());
+          final movies = await repository.getMovies();
+          await merge.addFromService(movies);
         }
       }
+
+      _movies.addAll(getIt<MergeService>().getMovies);
 
       if (_movies.isEmpty) {
         emit(const MoviesError('Brak dostępnych filmów'));

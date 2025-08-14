@@ -192,7 +192,6 @@ class ServiceMovieDetailsModelAdapter
       isSeries: fields[10] as bool,
       videoUrls: (fields[5] as List?)?.cast<HostLink>(),
       seasons: (fields[11] as List?)?.cast<SeasonModel>(),
-      directUrls: (fields[6] as List?)?.cast<VideoSource>(),
     );
   }
 
@@ -212,8 +211,6 @@ class ServiceMovieDetailsModelAdapter
       ..write(obj.imageUrl)
       ..writeByte(5)
       ..write(obj.videoUrls)
-      ..writeByte(6)
-      ..write(obj.directUrls)
       ..writeByte(10)
       ..write(obj.isSeries)
       ..writeByte(11)

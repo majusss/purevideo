@@ -4,7 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
-import 'package:purevideo/data/repositories/auth_repository.dart';
+import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
+import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_bloc.dart';
 import 'package:purevideo/presentation/movie_details/bloc/movie_details_event.dart';
@@ -13,13 +14,11 @@ import 'package:purevideo/presentation/global/widgets/error_view.dart';
 import 'package:fast_cached_network_image/fast_cached_network_image.dart';
 
 class MovieDetailsScreen extends StatelessWidget {
-  final SupportedService service;
-  final String url;
+  final MovieModel movie;
 
   const MovieDetailsScreen({
     super.key,
-    required this.service,
-    required this.url,
+    required this.movie,
   });
 
   @override
@@ -27,7 +26,7 @@ class MovieDetailsScreen extends StatelessWidget {
     return BlocProvider(
       create: (context) => MovieDetailsBloc()
         ..add(
-          LoadMovieDetails(service: service, url: url),
+          LoadMovieDetails(movie: movie),
         ),
       child: const MovieDetailsView(),
     );
@@ -121,8 +120,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
               service['service'] != null &&
               service['url'] != null) {
             bloc.add(LoadMovieDetails(
-              service: service['service'],
-              url: service['url'],
+              movie: service['movie'] as MovieModel,
             ));
           }
         },
@@ -148,27 +146,27 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (movie.genres.isNotEmpty)
-                        Wrap(
-                          spacing: 8.0,
-                          children: movie.genres
-                              .map(
-                                (genre) => Chip(
-                                  label: Text(genre),
-                                  backgroundColor:
-                                      colorScheme.secondaryContainer,
-                                  labelStyle: textTheme.bodyMedium?.copyWith(
-                                    color: colorScheme.onSecondaryContainer,
-                                  ),
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 8,
-                                  ),
-                                  visualDensity: VisualDensity.compact,
-                                ),
-                              )
-                              .toList(),
-                        ),
-                      const SizedBox(height: 16),
+                      // if (movie.genres.isNotEmpty)
+                      //   Wrap(
+                      //     spacing: 8.0,
+                      //     children: movie.genres
+                      //         .map(
+                      //           (genre) => Chip(
+                      //             label: Text(genre),
+                      //             backgroundColor:
+                      //                 colorScheme.secondaryContainer,
+                      //             labelStyle: textTheme.bodyMedium?.copyWith(
+                      //               color: colorScheme.onSecondaryContainer,
+                      //             ),
+                      //             padding: const EdgeInsets.symmetric(
+                      //               horizontal: 8,
+                      //             ),
+                      //             visualDensity: VisualDensity.compact,
+                      //           ),
+                      //         )
+                      //         .toList(),
+                      //   ),
+                      // const SizedBox(height: 16),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
@@ -180,18 +178,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                                 borderRadius: BorderRadius.circular(12),
                                 child: FastCachedImage(
                                   url: movie.imageUrl,
-                                  headers: {
-                                    'User-Agent':
-                                        'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
-                                    'Cookie': getIt<
-                                                    Map<SupportedService,
-                                                        AuthRepository>>()[
-                                                movie.service]
-                                            ?.getAccount()
-                                            ?.cookies
-                                            .join('; ') ??
-                                        '',
-                                  },
+                                  headers: movie.imageHeaders,
                                   fit: BoxFit.cover,
                                   errorBuilder: (context, error, stackTrace) =>
                                       Container(
@@ -218,23 +205,23 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                         ],
                       ),
                       const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          _buildInfoChip(
-                            Icons.calendar_month_outlined,
-                            movie.year,
-                            context,
-                          ),
-                          const SizedBox(width: 12),
-                          if (movie.countries.isNotEmpty)
-                            _buildInfoChip(
-                              Icons.public_outlined,
-                              movie.countries.join(', '),
-                              context,
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                      // Row(
+                      //   children: [
+                      //     _buildInfoChip(
+                      //       Icons.calendar_month_outlined,
+                      //       movie.year,
+                      //       context,
+                      //     ),
+                      //     const SizedBox(width: 12),
+                      //     if (movie.countries.isNotEmpty)
+                      //       _buildInfoChip(
+                      //         Icons.public_outlined,
+                      //         movie.countries.join(', '),
+                      //         context,
+                      //       ),
+                      //   ],
+                      // ),
+                      // const SizedBox(height: 16),
                       _buildPlayButton(context, state),
                     ],
                   ),
@@ -257,9 +244,31 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                 const SizedBox(height: 24),
                 if (state.isSeries && state.seasons.isNotEmpty)
                   _buildSeriesSection(context, state),
-                for (var link in movie.videoUrls ?? []) Text(link.url),
-                const Divider(),
-                for (var link in movie.directUrls ?? []) Text(link.url),
+                for (final service in movie.services) ...[
+                  Text(
+                      'Serwis: ${service.service.displayName} - ${service.title.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(RegExp(r'\s+'), ' ').trim()} - ${service.url}',
+                      style: textTheme.titleSmall),
+                  const SizedBox(height: 6),
+                  for (final link in service.videoUrls ?? [])
+                    Text(
+                      link.url,
+                      style: textTheme.bodySmall?.copyWith(
+                        color: colorScheme.primary,
+                      ),
+                    ),
+                  const Divider()
+                ],
+                Text('Directs', style: textTheme.titleSmall),
+                const SizedBox(height: 6),
+                for (final VideoSource link in movie.directUrls ?? []) ...[
+                  Text(
+                    '${link.host}: ${link.url}',
+                    style: textTheme.bodySmall?.copyWith(
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                ]
               ]),
             ),
           ),
@@ -327,20 +336,20 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
     }
   }
 
-  Widget _buildInfoChip(IconData icon, String text, BuildContext context) {
-    if (text.isEmpty) return const SizedBox.shrink();
-    return Chip(
-      avatar: Icon(
-        icon,
-        size: 16,
-        color: Theme.of(context).colorScheme.onSurfaceVariant,
-      ),
-      label: Text(text),
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 8),
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
-    );
-  }
+  // Widget _buildInfoChip(IconData icon, String text, BuildContext context) {
+  //   if (text.isEmpty) return const SizedBox.shrink();
+  //   return Chip(
+  //     avatar: Icon(
+  //       icon,
+  //       size: 16,
+  //       color: Theme.of(context).colorScheme.onSurfaceVariant,
+  //     ),
+  //     label: Text(text),
+  //     visualDensity: VisualDensity.compact,
+  //     padding: const EdgeInsets.symmetric(horizontal: 8),
+  //     backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+  //   );
+  // }
 
   Widget _buildSeriesSection(BuildContext context, MovieDetailsState state) {
     final textTheme = Theme.of(context).textTheme;

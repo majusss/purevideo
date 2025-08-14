@@ -27,7 +27,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
   final VideoSourceRepository _videoSourceRepository =
       getIt<VideoSourceRepository>();
-  late MovieRepository _movieRepository;
+  late Map<SupportedService, MovieRepository> _movieRepositories;
 
   MovieDetailsModel? _movie;
   int? _seasonIndex;
@@ -99,8 +99,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _seasonIndex = event.seasonIndex;
     _episodeIndex = event.episodeIndex;
 
-    _movieRepository =
-        getIt<Map<SupportedService, MovieRepository>>()[event.movie.service]!;
+    _movieRepositories = getIt<Map<SupportedService, MovieRepository>>();
 
     _initMediaKit();
 
@@ -127,29 +126,21 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       MovieDetailsModel movieDetails;
 
       if (_seasonIndex != null && _episodeIndex != null) {
-        final episode =
-            _movie!.seasons![_seasonIndex!].episodes[_episodeIndex!];
-        final episodeWithHosts =
-            await _movieRepository.getEpisodeHosts(episode);
+        // final episode =
+        //     _movie!.seasons![_seasonIndex!].episodes[_episodeIndex!];
+        // final episodeWithHosts =
+        //     await _movieRepository.getEpisodeHosts(episode);
 
-        final tempModel = MovieDetailsModel(
-          service: _movie!.service,
-          url: episode.url,
-          title: episode.title,
-          description: '',
-          imageUrl: _movie!.imageUrl,
-          year: _movie!.year,
-          genres: _movie!.genres,
-          countries: _movie!.countries,
-          isSeries: true,
-          videoUrls: episodeWithHosts.videoUrls,
-        );
+        // final tempModel = MovieDetailsModel(
+        //   services: [ServiceMovieDetailsModel(service: , url: url, title: title, description: description, imageUrl: imageUrl, isSeries: isSeries)]
+        // );
 
-        movieDetails = await _videoSourceRepository.scrapeVideoUrls(tempModel);
+        // movieDetails = await _videoSourceRepository.scrapeVideoUrls(tempModel);
       } else {
-        movieDetails = _movie!;
+        // movieDetails = _movie!;
         // await _videoSourceRepository.scrapeVideoUrls(_movie!); we already done this in movie details block
       }
+      movieDetails = _movie!;
 
       if (movieDetails.directUrls != null &&
           movieDetails.directUrls!.isNotEmpty) {
