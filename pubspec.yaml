@@ -34,6 +34,9 @@ dependencies:
   fast_cached_network_image: ^1.3.3+5
   collection: any
   url_launcher: ^6.3.2
+  flutter_cast_framework:
+    git:
+      url: https://github.com/majusss/flutter_cast_framework.git
 
 dev_dependencies:
   flutter_test:

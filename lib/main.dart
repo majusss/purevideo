@@ -57,6 +57,7 @@ void main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
 
   runApp(PureVideoApp());
 }

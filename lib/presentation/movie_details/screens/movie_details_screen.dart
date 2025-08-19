@@ -133,144 +133,147 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
 
     return Scaffold(
       appBar: AppBar(),
-      body: CustomScrollView(
-        slivers: [
-          SliverToBoxAdapter(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // if (movie.genres.isNotEmpty)
-                      //   Wrap(
-                      //     spacing: 8.0,
-                      //     children: movie.genres
-                      //         .map(
-                      //           (genre) => Chip(
-                      //             label: Text(genre),
-                      //             backgroundColor:
-                      //                 colorScheme.secondaryContainer,
-                      //             labelStyle: textTheme.bodyMedium?.copyWith(
-                      //               color: colorScheme.onSecondaryContainer,
-                      //             ),
-                      //             padding: const EdgeInsets.symmetric(
-                      //               horizontal: 8,
-                      //             ),
-                      //             visualDensity: VisualDensity.compact,
-                      //           ),
-                      //         )
-                      //         .toList(),
-                      //   ),
-                      // const SizedBox(height: 16),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          SizedBox(
-                            width: 140,
-                            child: AspectRatio(
-                              aspectRatio: 11 / 16,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12),
-                                child: FastCachedImage(
-                                  url: movie.imageUrl,
-                                  headers: movie.imageHeaders,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) =>
-                                      Container(
-                                    color: Colors.grey[800],
-                                    child: const Icon(
-                                      Icons.broken_image,
-                                      size: 50,
-                                      color: Colors.grey,
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // if (movie.genres.isNotEmpty)
+                        //   Wrap(
+                        //     spacing: 8.0,
+                        //     children: movie.genres
+                        //         .map(
+                        //           (genre) => Chip(
+                        //             label: Text(genre),
+                        //             backgroundColor:
+                        //                 colorScheme.secondaryContainer,
+                        //             labelStyle: textTheme.bodyMedium?.copyWith(
+                        //               color: colorScheme.onSecondaryContainer,
+                        //             ),
+                        //             padding: const EdgeInsets.symmetric(
+                        //               horizontal: 8,
+                        //             ),
+                        //             visualDensity: VisualDensity.compact,
+                        //           ),
+                        //         )
+                        //         .toList(),
+                        //   ),
+                        // const SizedBox(height: 16),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SizedBox(
+                              width: 140,
+                              child: AspectRatio(
+                                aspectRatio: 11 / 16,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: FastCachedImage(
+                                    url: movie.imageUrl,
+                                    headers: movie.imageHeaders,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            Container(
+                                      color: Colors.grey[800],
+                                      child: const Icon(
+                                        Icons.broken_image,
+                                        size: 50,
+                                        color: Colors.grey,
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Text(
-                              movie.title,
-                              style: textTheme.headlineSmall,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: Text(
+                                movie.title,
+                                style: textTheme.headlineSmall,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      // Row(
-                      //   children: [
-                      //     _buildInfoChip(
-                      //       Icons.calendar_month_outlined,
-                      //       movie.year,
-                      //       context,
-                      //     ),
-                      //     const SizedBox(width: 12),
-                      //     if (movie.countries.isNotEmpty)
-                      //       _buildInfoChip(
-                      //         Icons.public_outlined,
-                      //         movie.countries.join(', '),
-                      //         context,
-                      //       ),
-                      //   ],
-                      // ),
-                      // const SizedBox(height: 16),
-                      _buildPlayButton(context, state),
-                    ],
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        // Row(
+                        //   children: [
+                        //     _buildInfoChip(
+                        //       Icons.calendar_month_outlined,
+                        //       movie.year,
+                        //       context,
+                        //     ),
+                        //     const SizedBox(width: 12),
+                        //     if (movie.countries.isNotEmpty)
+                        //       _buildInfoChip(
+                        //         Icons.public_outlined,
+                        //         movie.countries.join(', '),
+                        //         context,
+                        //       ),
+                        //   ],
+                        // ),
+                        // const SizedBox(height: 16),
+                        _buildPlayButton(context, state),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          SliverPadding(
-            padding: const EdgeInsets.all(16),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                Text('Opis', style: textTheme.titleLarge),
-                const SizedBox(height: 8),
-                Text(
-                  movie.description,
-                  style: textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurfaceVariant,
+            SliverPadding(
+              padding: const EdgeInsets.all(16),
+              sliver: SliverList(
+                delegate: SliverChildListDelegate([
+                  Text('Opis', style: textTheme.titleLarge),
+                  const SizedBox(height: 8),
+                  Text(
+                    movie.description,
+                    style: textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurfaceVariant,
+                    ),
                   ),
-                ),
-                const SizedBox(height: 24),
-                if (state.isSeries && state.seasons.isNotEmpty)
-                  _buildSeriesSection(context, state),
-                // for (final service in movie.services) ...[
-                //   Text(
-                //       'Serwis: ${service.service.displayName} - ${service.title.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(RegExp(r'\s+'), ' ').trim()} - ${service.url}',
-                //       style: textTheme.titleSmall),
-                //   const SizedBox(height: 6),
-                //   for (final link in service.videoUrls ?? [])
-                //     Text(
-                //       link.url,
-                //       style: textTheme.bodySmall?.copyWith(
-                //         color: colorScheme.primary,
-                //       ),
-                //     ),
-                //   const Divider()
-                // ],
-                // Text('Directs', style: textTheme.titleSmall),
-                // const SizedBox(height: 6),
-                // for (final VideoSource link in movie.directUrls ?? []) ...[
-                //   Text(
-                //     '${link.host}: ${link.url}',
-                //     style: textTheme.bodySmall?.copyWith(
-                //       color: colorScheme.primary,
-                //     ),
-                //   ),
-                //   const SizedBox(height: 4),
-                // ]
-              ]),
+                  const SizedBox(height: 24),
+                  if (state.isSeries && state.seasons.isNotEmpty)
+                    _buildSeriesSection(context, state),
+                  // for (final service in movie.services) ...[
+                  //   Text(
+                  //       'Serwis: ${service.service.displayName} - ${service.title.toLowerCase().trim().replaceAll(RegExp(r'[^\w\s]'), '').replaceAll(RegExp(r'\s+'), ' ').trim()} - ${service.url}',
+                  //       style: textTheme.titleSmall),
+                  //   const SizedBox(height: 6),
+                  //   for (final link in service.videoUrls ?? [])
+                  //     Text(
+                  //       link.url,
+                  //       style: textTheme.bodySmall?.copyWith(
+                  //         color: colorScheme.primary,
+                  //       ),
+                  //     ),
+                  //   const Divider()
+                  // ],
+                  // Text('Directs', style: textTheme.titleSmall),
+                  // const SizedBox(height: 6),
+                  // for (final VideoSource link in movie.directUrls ?? []) ...[
+                  //   Text(
+                  //     '${link.host}: ${link.url}',
+                  //     style: textTheme.bodySmall?.copyWith(
+                  //       color: colorScheme.primary,
+                  //     ),
+                  //   ),
+                  //   const SizedBox(height: 4),
+                  // ]
+                ]),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

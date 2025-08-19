@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:media_kit_video/media_kit_video.dart';
@@ -11,6 +12,7 @@ import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/player/bloc/player_event.dart';
 import 'package:purevideo/presentation/player/bloc/player_state.dart';
+import 'package:flutter_cast_framework/cast.dart' hide PlayerState;
 
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final WatchedService watchedService = getIt();
@@ -34,7 +36,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   int? _seasonIndex;
   int? _episodeIndex;
 
-  PlayerBloc() : super(const PlayerState()) {
+  PlayerBloc()
+      : super(PlayerState(castFramework: getIt<FlutterCastFramework>())) {
     on<InitializePlayer>(_onInitializePlayer);
     on<LoadVideoSources>(_onLoadVideoSources);
     on<InitializeVideoPlayer>(_onInitializeVideoPlayer);
@@ -53,6 +56,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     on<PlayerError>(_onPlayerError);
     on<DisposePlayer>(_onDisposePlayer);
     on<ToggleImmersiveMode>(_onToggleImmersiveMode);
+    on<CastVideo>(_onCastVideo);
   }
 
   @override
@@ -193,6 +197,33 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       displayState: 'Przygotowywanie odtwarzacza...',
       isBuffering: true,
     ));
+
+    if (state.castFramework.castContext.state.value == CastState.connected) {
+      add(const CastVideo());
+      final sessionManager = state.castFramework.castContext.sessionManager;
+      sessionManager.remoteMediaClient.onProgressUpdated =
+          (final progressMs, final durationMs) {
+        add(UpdatePosition(
+          position: Duration(milliseconds: progressMs),
+        ));
+      };
+    }
+
+    try {
+      state.castFramework.castContext.state.addListener(
+        () async {
+          switch (state.castFramework.castContext.state.value) {
+            case CastState.connected:
+              add(const CastVideo());
+              break;
+            default:
+              break;
+          }
+        },
+      );
+    } catch (e) {
+      debugPrint('Error initializing google cast: $e');
+    }
 
     try {
       final Map<String, String> headers = event.source.headers ?? {};
@@ -366,6 +397,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     DisposePlayer event,
     Emitter<PlayerState> emit,
   ) async {
+    state.castFramework.castContext.sessionManager.remoteMediaClient.stop();
     if (_movie != null) {
       if (_movie!.isSeries) {
         watchedService.watchEpisode(
@@ -399,4 +431,40 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   }
 
   VideoController get controller => _controller;
+
+  Future<void> _onCastVideo(CastVideo event, Emitter<PlayerState> emit) async {
+    if (state.castFramework.castContext.state.value == CastState.connected) {
+      if (state.selectedSource == null) {
+        emit(state.copyWith(
+          errorMessage: 'Nie wybrano źródła wideo do przesłania.',
+        ));
+        return;
+      }
+      _player.pause();
+      state.castFramework.castContext.sessionManager.remoteMediaClient.load(
+          MediaLoadRequestData(
+              currentTime: state.position.inMilliseconds,
+              shouldAutoplay: true,
+              mediaInfo: MediaInfo(
+                  streamDuration: state.duration.inMilliseconds,
+                  streamType: StreamType.buffered,
+                  contentType: 'videos/mp4',
+                  contentId: state.selectedSource!.url,
+                  mediaMetadata: MediaMetadata(
+                      mediaType: MediaType.movie,
+                      strings: _movie!.isSeries
+                          ? {
+                              MediaMetadataKey.title.name: _movie!
+                                  .seasons![_seasonIndex!]
+                                  .episodes[_episodeIndex!]
+                                  .title,
+                              MediaMetadataKey.subtitle.name: _movie!.title,
+                            }
+                          : {MediaMetadataKey.title.name: _movie!.title},
+                      webImages: [
+                        WebImage(url: _movie!.imageUrl),
+                        WebImage(url: _movie!.imageUrl)
+                      ]))));
+    }
+  }
 }

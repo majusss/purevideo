@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:flutter_cast_framework/cast.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
 
 enum SeekDirection { forward, backward }
@@ -18,6 +19,8 @@ class PlayerState extends Equatable {
   final String? errorMessage;
   final String displayState;
 
+  final FlutterCastFramework castFramework;
+
   const PlayerState({
     this.isLoading = true,
     this.isPlaying = false,
@@ -32,6 +35,7 @@ class PlayerState extends Equatable {
     this.selectedSource,
     this.errorMessage,
     this.displayState = 'Ładowanie...',
+    required this.castFramework,
   });
 
   PlayerState copyWith({
@@ -48,6 +52,7 @@ class PlayerState extends Equatable {
     VideoSource? selectedSource,
     String? errorMessage,
     String? displayState,
+    FlutterCastFramework? castFramework,
   }) {
     return PlayerState(
       isLoading: isLoading ?? this.isLoading,
@@ -63,6 +68,7 @@ class PlayerState extends Equatable {
       selectedSource: selectedSource ?? this.selectedSource,
       errorMessage: errorMessage,
       displayState: displayState ?? this.displayState,
+      castFramework: castFramework ?? this.castFramework,
     );
   }
 
@@ -81,5 +87,6 @@ class PlayerState extends Equatable {
         selectedSource,
         errorMessage,
         displayState,
+        castFramework,
       ];
 }

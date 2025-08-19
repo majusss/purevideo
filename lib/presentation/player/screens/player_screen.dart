@@ -10,6 +10,7 @@ import 'package:purevideo/presentation/player/bloc/player_bloc.dart';
 import 'package:purevideo/presentation/player/bloc/player_event.dart';
 import 'package:purevideo/presentation/player/bloc/player_state.dart';
 import 'package:screen_brightness/screen_brightness.dart';
+import 'package:flutter_cast_framework/widgets.dart';
 
 class PlayerScreen extends StatefulWidget {
   final MovieDetailsModel movie;
@@ -444,7 +445,13 @@ class PlayerView extends StatelessWidget {
                     color: Colors.white),
                 onPressed: () {
                   bloc.add(const ToggleImmersiveMode());
-                })
+                }),
+            CastButton(
+              castFramework: state.castFramework,
+              activeColor: Colors.white,
+              color: Colors.white,
+              disabledColor: Colors.white,
+            )
           ],
         ),
       ),

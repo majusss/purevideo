@@ -1,3 +1,4 @@
+import 'package:flutter_cast_framework/cast.dart';
 import 'package:get_it/get_it.dart';
 import 'package:purevideo/core/services/merg_service.dart';
 import 'package:purevideo/core/services/settings_service.dart';
@@ -28,6 +29,10 @@ void setupInjection() {
   final videoHostRegistry = VideoHostRegistry();
   getIt.registerSingleton<VideoHostRegistry>(videoHostRegistry);
   VideoHostsContainer.registerVideoScrapers(videoHostRegistry);
+
+  getIt.registerSingleton<FlutterCastFramework>(
+    FlutterCastFramework.create(['urn:x-cast:majusss-purevideo']),
+  );
 
   getIt.registerFactory<CaptchaService>(() => CaptchaService());
   getIt.registerFactory<WebViewService>(() => WebViewService());
