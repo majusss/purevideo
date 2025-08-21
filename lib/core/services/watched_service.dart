@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
+import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/models/watched_model.dart';
@@ -35,9 +36,13 @@ class WatchedService {
   }
 
   WatchedMovieModel? getByMovie(MovieDetailsModel movie) {
-    return box.values.firstWhereIndexedOrNull((index, boxElement) => movie
-        .services
-        .any((element) => boxElement.movie.services.contains(element)));
+    final movieServiceUrls =
+        movie.services.map((service) => service.url).toSet();
+    return box.values.firstWhereOrNull((boxElement) {
+      final boxServiceUrls =
+          boxElement.movie.services.map((service) => service.url).toSet();
+      return movieServiceUrls.intersection(boxServiceUrls).isNotEmpty;
+    });
   }
 
   WatchedEpisodeModel? getByEpisode(
