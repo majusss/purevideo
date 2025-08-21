@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/widgets.dart';
 import 'package:purevideo/core/services/webview_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/link_model.dart';
@@ -95,9 +94,6 @@ class EkinoMovieRepository implements MovieRepository {
     final document = html.parse(episodeResponse.data);
 
     final videoUrls = await _extractHostLinksFromDocument(document);
-
-    videoUrls.map((url) => debugPrint('Video URL: ${url.url} from ${url.lang} '
-        '(${url.quality})'));
 
     return episode.copyWith(
       videoUrls: videoUrls,

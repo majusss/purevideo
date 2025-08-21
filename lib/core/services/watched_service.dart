@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:collection/collection.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/models/watched_model.dart';
