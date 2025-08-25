@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:math';
+import 'package:audio_service/audio_service.dart';
+import 'package:audio_session/audio_session.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:media_kit/media_kit.dart' hide PlayerState;
 import 'package:media_kit_video/media_kit_video.dart';
+import 'package:purevideo/core/services/media_service.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
@@ -31,6 +34,9 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       getIt<VideoSourceRepository>();
   final Map<SupportedService, MovieRepository> _movieRepositories =
       getIt<Map<SupportedService, MovieRepository>>();
+  final MediaService _mediaService = getIt<MediaService>();
+
+  late final AudioSession _audioSession;
 
   MovieDetailsModel? _movie;
   int? _seasonIndex;
@@ -136,14 +142,20 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
             continue;
           }
 
-          final episode =
-              service.seasons![_seasonIndex!].episodes[_episodeIndex!];
+          debugPrint(
+              'Fetching episode from service: ${service.service} (seasons: ${service.seasons?.length}), season index: $_seasonIndex, episode index: $_episodeIndex');
+
+          if (_seasonIndex! >= service.seasons!.length) continue;
+          final season = service.seasons?[_seasonIndex!];
+          if (season == null) continue;
+          if (_episodeIndex! >= season.episodes.length) continue;
+          final episode = season.episodes[_episodeIndex!];
           final episodeWithHosts =
               await movieRepository.getEpisodeHosts(episode);
           episodes.add(episodeWithHosts);
         }
 
-        // this is dummy af but this system works better from films
+        // this is dummy af but this system works better for movies than series
         final tempModel = MovieDetailsModel(
           services: [
             ServiceMovieDetailsModel(
@@ -226,6 +238,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     }
 
     try {
+      _audioSession = await AudioSession.instance;
+      await _audioSession.configure(const AudioSessionConfiguration.music());
+    } catch (e) {
+      debugPrint('Error initializing audio session: $e');
+    }
+
+    try {
       final Map<String, String> headers = event.source.headers ?? {};
 
       int? watchedPosition;
@@ -244,7 +263,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         Media(event.source.url,
             httpHeaders: headers,
             start: Duration(seconds: watchedPosition ?? 0)),
-        play: true,
+        play: await _audioSession.setActive(true),
       );
 
       emit(state.copyWith(
@@ -265,6 +284,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     PlayPause event,
     Emitter<PlayerState> emit,
   ) async {
+    _audioSession.setActive(!state.isPlaying);
     _player.playOrPause();
 
     if (state.isOverlayVisible) {
@@ -360,6 +380,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Emitter<PlayerState> emit,
   ) async {
     emit(state.copyWith(position: event.position));
+    _updateNotification();
   }
 
   Future<void> _onUpdateDuration(
@@ -367,6 +388,16 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Emitter<PlayerState> emit,
   ) async {
     emit(state.copyWith(duration: event.duration));
+    if (event.duration.inSeconds == 0) {
+      return;
+    }
+    _mediaService.audioHandler.add(MediaItem(
+      id: _movie!.title,
+      title: _movie!.title,
+      artUri: Uri.parse(_movie!.imageUrl),
+      duration: state.duration,
+    ));
+    _updateNotification();
   }
 
   Future<void> _onUpdatePlayingState(
@@ -374,6 +405,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Emitter<PlayerState> emit,
   ) async {
     emit(state.copyWith(isPlaying: event.isPlaying));
+    _updateNotification();
   }
 
   Future<void> _onUpdateBufferingState(
@@ -381,6 +413,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     Emitter<PlayerState> emit,
   ) async {
     emit(state.copyWith(isBuffering: event.isBuffering));
+    _updateNotification();
   }
 
   Future<void> _onPlayerError(
@@ -397,6 +430,10 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     DisposePlayer event,
     Emitter<PlayerState> emit,
   ) async {
+    _audioSession.setActive(false);
+    _mediaService.audioHandler.playbackState.add(PlaybackState(
+      playing: false,
+    ));
     state.castFramework.castContext.sessionManager.remoteMediaClient.stop();
     if (_movie != null) {
       if (_movie!.isSeries) {
@@ -466,5 +503,16 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
                         WebImage(url: _movie!.imageUrl)
                       ]))));
     }
+  }
+
+  void _updateNotification() {
+    _mediaService.audioHandler.playbackState.add(PlaybackState(
+      playing: state.isPlaying,
+      updatePosition: state.position,
+      processingState: state.isBuffering
+          ? AudioProcessingState.buffering
+          : AudioProcessingState.ready,
+      bufferedPosition: state.duration,
+    ));
   }
 }

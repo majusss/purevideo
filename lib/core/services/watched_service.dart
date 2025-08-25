@@ -44,6 +44,16 @@ class WatchedService {
     });
   }
 
+  dynamic getKeyByMovie(MovieDetailsModel movie) {
+    final movieServiceUrls =
+        movie.services.map((service) => service.url).toSet();
+    return box.toMap().entries.firstWhereOrNull((boxElement) {
+      final boxServiceUrls =
+          boxElement.value.movie.services.map((service) => service.url).toSet();
+      return movieServiceUrls.intersection(boxServiceUrls).isNotEmpty;
+    })?.key;
+  }
+
   WatchedEpisodeModel? getByEpisode(
       MovieDetailsModel movie, EpisodeModel episode) {
     final watchedMovie = getByMovie(movie);
@@ -51,6 +61,10 @@ class WatchedService {
   }
 
   void watchMovie(MovieDetailsModel movie, int watchedTime) {
+    final existingKey = getKeyByMovie(movie);
+    if (existingKey != null) {
+      box.delete(existingKey);
+    }
     final watchedMovie = WatchedMovieModel(
       movie: movie,
       watchedTime: watchedTime,
@@ -85,6 +99,10 @@ class WatchedService {
     watchedMovie.episodes!.add(
         WatchedSeasonEpisode(season: season, watchedEpisode: watchedEpisode));
 
+    final existingKey = getKeyByMovie(movie);
+    if (existingKey != null) {
+      box.delete(existingKey);
+    }
     box.add(watchedMovie);
     _notifyListeners();
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:media_kit/media_kit.dart';
+import 'package:purevideo/core/services/media_service.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/di/adapters_container.dart';
@@ -44,6 +45,7 @@ void main() async {
   setupInjection();
   await getIt<SettingsService>().init();
   await getIt<WatchedService>().init();
+  await getIt<MediaService>().init();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(

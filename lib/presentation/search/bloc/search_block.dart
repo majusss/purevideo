@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/services/merg_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
+import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/data/repositories/search_repository.dart';
 import 'package:purevideo/presentation/search/bloc/search_event.dart';
@@ -39,6 +40,8 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
 
       final merge = getIt<MergeService>();
 
+      final results = <MovieModel>[];
+
       for (final entry in _searchRepositories.entries) {
         try {
           final account = _authRepositories[entry.key]?.getAccount();
@@ -46,13 +49,13 @@ class SearchBloc extends Bloc<SearchEvent, SearchState> {
             continue;
           }
           final repositoryResults = await entry.value.searchMovies(event.query);
-          await merge.addFromService(repositoryResults);
+          await merge.addFromServiceTemp(repositoryResults, results);
         } catch (e) {
           continue;
         }
       }
 
-      emit(SearchLoaded(merge.searchMovies(event.query)));
+      emit(SearchLoaded(results));
     } catch (e) {
       emit(SearchError(e.toString()));
     }

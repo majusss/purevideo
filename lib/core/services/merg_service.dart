@@ -32,6 +32,38 @@ class MergeService {
     }
   }
 
+  Future<List<MovieModel>> addFromServiceTemp(
+      List<ServiceMovieModel> toAdd, List<MovieModel> existingMovies) async {
+    if (toAdd.isEmpty) return [];
+
+    for (final movie in toAdd) {
+      final normalizedTitle = _normalizeTitle(movie.title);
+
+      final existingMovieIndex = existingMovies.indexWhere(
+        (existingMovie) =>
+            _normalizeTitle(existingMovie.services.first.title) ==
+            normalizedTitle,
+      );
+
+      if (existingMovieIndex != -1) {
+        final existingMovie = existingMovies[existingMovieIndex];
+        final hasService = existingMovie.services.any(
+          (service) => service.service == movie.service,
+        );
+
+        if (!hasService) {
+          final updatedServices = [...existingMovie.services, movie];
+          existingMovies[existingMovieIndex] =
+              MovieModel(services: updatedServices);
+        }
+      } else {
+        existingMovies.add(MovieModel(services: [movie]));
+      }
+    }
+
+    return existingMovies;
+  }
+
   List<MovieModel> get getMovies => _movies;
 
   List<MovieModel> searchMovies(String query) {
