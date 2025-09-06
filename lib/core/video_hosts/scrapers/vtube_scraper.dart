@@ -12,7 +12,8 @@ class VtubeScraper extends VideoHostScraper {
   String get name => 'Vtube';
 
   @override
-  List<String> get domains => ['vtbe.to', 'vtube.to'];
+  List<String> get domains =>
+      ['vtube.to', 'vtplay.net', 'vtbe.net', 'vtbe.to', 'vtube.network'];
 
   String _deobfuscate(String p, final int a, int c, final List<String> k) {
     while (c-- > 0) {

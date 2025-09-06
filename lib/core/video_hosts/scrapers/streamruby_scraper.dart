@@ -18,7 +18,7 @@ class StreamrubyScraper extends VideoHostScraper {
         'tuktukcimamulti.buzz',
         'stmruby.com',
         'rubystm.com',
-        'rubyvid.com',
+        'rubyvid.com'
       ];
 
   static const String _pattern =

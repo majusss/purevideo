@@ -13,8 +13,30 @@ class StreamtapeScraper extends VideoHostScraper {
   @override
   List<String> get domains => [
         'streamtape.com',
+        'strtape.cloud',
         'streamtape.net',
+        'streamta.pe',
+        'streamtape.site',
+        'strcloud.link',
+        'strcloud.club',
+        'strtpe.link',
+        'streamtape.cc',
+        'scloud.online',
+        'stape.fun',
+        'streamadblockplus.com',
+        'shavetape.cash',
+        'streamtape.to',
+        'streamta.site',
+        'streamadblocker.xyz',
+        'tapewithadblock.org',
+        'adblocktape.wiki',
+        'antiadtape.com',
         'streamtape.xyz',
+        'tapeblocker.com',
+        'streamnoads.com',
+        'tapeadvertisement.com',
+        'tapeadsenjoyer.com',
+        'watchadsontape.com'
       ];
 
   @override

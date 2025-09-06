@@ -68,7 +68,6 @@ class FileMoonScraper extends VideoHostScraper {
     }
 
     try {
-      // Replacer dla cyfr zgodnie z Python
       final replacedSeed = dataSeed.replaceAllMapped(
         RegExp(r'[012567]'),
         (match) {
@@ -103,7 +102,6 @@ class FileMoonScraper extends VideoHostScraper {
 
       final result = _bytes2Str(_unpad(_blocks2Bytes(a74)));
 
-      // Drugi replacer
       return result.replaceAllMapped(
         RegExp(r'[012567]'),
         (match) {
@@ -316,7 +314,6 @@ class FileMoonScraper extends VideoHostScraper {
     int a9 = 0;
 
     while (true) {
-      // Znajdź pierwszy prawidłowy znak
       do {
         a6++;
         if (a6 >= a7) return result;
@@ -324,7 +321,6 @@ class FileMoonScraper extends VideoHostScraper {
 
       result.add(_toInt32(a2b[input[a6]]! << 2));
 
-      // Znajdź drugi prawidłowy znak
       do {
         a6++;
         if (a6 >= a7) return result;
@@ -338,7 +334,6 @@ class FileMoonScraper extends VideoHostScraper {
       if (a3 == 0 && a6 == (a7 - 1)) return result;
       result.add(_toInt32(a3 << 4));
 
-      // Znajdź trzeci prawidłowy znak
       do {
         a6++;
         if (a6 >= a7) return result;
@@ -352,7 +347,6 @@ class FileMoonScraper extends VideoHostScraper {
       if (a3 == 0 && a6 == (a7 - 1)) return result;
       result.add(_toInt32(a3 << 6));
 
-      // Znajdź czwarty prawidłowy znak
       do {
         a6++;
         if (a6 >= a7) return result;
@@ -390,7 +384,6 @@ class FileMoonScraper extends VideoHostScraper {
 
       String html = response.data.toString();
 
-      // Sprawdź czy strona nie została znaleziona i spróbuj /d/ zamiast /e/
       if (html.contains('<h1>Page not found</h1>') ||
           html.contains(
               '<h1>This video cannot be watched under this domain</h1>')) {
@@ -402,7 +395,6 @@ class FileMoonScraper extends VideoHostScraper {
         html = response.data.toString();
       }
 
-      // Sprawdź czy jest iframe redirect
       final iframeMatch = RegExp(r'<iframe\s*src="([^"]+)').firstMatch(html);
       if (iframeMatch != null) {
         webUrl = iframeMatch.group(1)!;
@@ -420,10 +412,8 @@ class FileMoonScraper extends VideoHostScraper {
         html = response.data.toString();
       }
 
-      // Dodaj rozpakowane dane JS
       html += _getPackedData(html);
 
-      // Pierwsza metoda: postData z tear_decode
       final postDataMatch =
           RegExp(_postDataPattern, dotAll: true).firstMatch(html);
       if (postDataMatch != null) {
@@ -488,7 +478,6 @@ class FileMoonScraper extends VideoHostScraper {
         }
       }
 
-      // Druga metoda: bezpośredni sources regex
       final sourcesMatch =
           RegExp(_sourcesPattern, dotAll: true).firstMatch(html);
       if (sourcesMatch != null) {
@@ -542,6 +531,7 @@ class FileMoonScraper extends VideoHostScraper {
         '96ar.com',
         'xcoic.com',
         'f51rm.com',
-        'c1z39.com'
+        'c1z39.com',
+        'boosteradx.online'
       ];
 }

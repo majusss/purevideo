@@ -19,8 +19,17 @@ class KinoGerScraper extends VideoHostScraper {
         'shiid4u.upn.one',
         'moflix.upns.xyz',
         'player.upn.one',
+        'disneycdn.net',
         'wasuytm.store',
-        'ultrastream.online'
+        'ultrastream.online',
+        'moflix.rpmplay.xyz',
+        'tuktuk.rpmvid.com',
+        'w1tv.xyz',
+        'filedecrypt.link',
+        'asianembed.cam',
+        'videoshar.uns.bio',
+        'videoland.cfd',
+        'dzo.vidplayer.live'
       ];
 
   static const String _pattern =

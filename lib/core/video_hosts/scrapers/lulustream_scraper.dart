@@ -15,6 +15,7 @@ class LuluStreamScraper extends VideoHostScraper {
         'lulustream.com',
         'luluvdo.com',
         'lulu.st',
+        'luluvid.com',
         '732eg54de642sa.sbs',
         'cdn1.site',
         'streamhihi.com',
