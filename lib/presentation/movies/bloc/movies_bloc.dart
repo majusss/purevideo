@@ -63,7 +63,7 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
         emit(const MoviesError('Zaloguj się aby zobaczyć filmy'));
         return;
       }
-      // need combine here
+
       _movies.addAll(_watchedService
           .getAll()
           .sorted(
@@ -82,18 +82,22 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       final merge = getIt<MergeService>();
 
       for (final entry in _repositories.entries) {
-        final service = entry.key;
         final repository = entry.value;
-        final authRepo = _authRepositories[service];
-        final account = authRepo?.getAccount();
 
-        if (account != null) {
-          final movies = await repository.getMovies();
-          await merge.addFromService(movies);
-        }
+        final movies = await repository.getMovies();
+        await merge.addFromService(movies);
       }
 
-      _movies.addAll(getIt<MergeService>().getMovies);
+      final loggedServices = _authRepositories.entries
+          .where((entry) => entry.value.getAccount() != null)
+          .map((entry) => entry.key)
+          .toSet();
+
+      _movies.addAll(getIt<MergeService>().getMovies.where((m) => m.services
+          .map((s) => s.service)
+          .toSet()
+          .intersection(loggedServices)
+          .isNotEmpty));
 
       if (_movies.isEmpty) {
         emit(const MoviesError('Brak dostępnych filmów'));

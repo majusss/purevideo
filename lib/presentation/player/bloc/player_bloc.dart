@@ -16,6 +16,7 @@ import 'package:purevideo/di/injection_container.dart';
 import 'package:purevideo/presentation/player/bloc/player_event.dart';
 import 'package:purevideo/presentation/player/bloc/player_state.dart';
 import 'package:flutter_cast_framework/cast.dart' hide PlayerState;
+import 'package:pip/pip.dart';
 
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final WatchedService watchedService = getIt();
@@ -43,7 +44,9 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   int? _episodeIndex;
 
   PlayerBloc()
-      : super(PlayerState(castFramework: getIt<FlutterCastFramework>())) {
+      : super(PlayerState(
+            castFramework: getIt<FlutterCastFramework>(),
+            pipFramework: Pip())) {
     on<InitializePlayer>(_onInitializePlayer);
     on<LoadVideoSources>(_onLoadVideoSources);
     on<InitializeVideoPlayer>(_onInitializeVideoPlayer);
@@ -112,6 +115,41 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
     _initMediaKit();
 
+    const options = PipOptions(
+      autoEnterEnabled: true,
+      aspectRatioX: 16,
+      aspectRatioY: 9,
+      sourceRectHintLeft: 0,
+      sourceRectHintTop: 0,
+      sourceRectHintRight: 1080,
+      sourceRectHintBottom: 720,
+      sourceContentView: 0,
+      contentView: 0,
+      preferredContentWidth: 480,
+      preferredContentHeight: 270,
+      controlStyle: 2,
+    );
+
+    await state.pipFramework.setup(options);
+
+    await state.pipFramework
+        .registerStateChangedObserver(PipStateChangedObserver(
+      onPipStateChanged: (pipState, error) {
+        switch (pipState) {
+          case PipState.pipStateStarted:
+            emit(state.copyWith(isOverlayVisible: false));
+            _hideControlsTimer?.cancel();
+            debugPrint('PiP started');
+            break;
+          case PipState.pipStateFailed:
+            debugPrint('PiP failed: $error');
+            break;
+          default:
+            break;
+        }
+      },
+    ));
+
     emit(state.copyWith(
       isLoading: true,
       errorMessage: null,
@@ -141,9 +179,6 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
           if (movieRepository == null) {
             continue;
           }
-
-          debugPrint(
-              'Fetching episode from service: ${service.service} (seasons: ${service.seasons?.length}), season index: $_seasonIndex, episode index: $_episodeIndex');
 
           if (_seasonIndex! >= service.seasons!.length) continue;
           final season = service.seasons?[_seasonIndex!];
@@ -446,6 +481,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
         watchedService.watchMovie(_movie!, state.position.inSeconds);
       }
     }
+    state.pipFramework.dispose();
     _disposeMediaKit();
     _hideControlsTimer?.cancel();
     _seekingTimer?.cancel();

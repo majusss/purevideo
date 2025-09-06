@@ -198,8 +198,7 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                               child: Text(
                                 movie.title,
                                 style: textTheme.headlineSmall,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
+                                overflow: TextOverflow.visible,
                               ),
                             ),
                           ],
