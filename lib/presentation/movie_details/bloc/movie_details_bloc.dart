@@ -37,10 +37,13 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
 
         final account = authRepository.getAccount();
         if (account == null) {
-          return emit(state.copyWith(
-            errorMessage:
-                'Nie jesteś zalogowany do ${serivceMovie.service.displayName}',
-          ));
+          if (event.movie.services.length == 1) {
+            return emit(state.copyWith(
+              errorMessage:
+                  'Nie jesteś zalogowany do ${serivceMovie.service.displayName}',
+            ));
+          }
+          continue;
         }
 
         final movieRepository = _movieRepositories[serivceMovie.service];
