@@ -1,6 +1,7 @@
 import 'package:hive_flutter/adapters.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/core/video_hosts/video_host_scraper.dart';
+import 'package:purevideo/data/models/filmweb_model.dart';
 import 'package:purevideo/data/models/link_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
@@ -38,9 +39,9 @@ class MovieModel {
   @HiveField(0)
   final List<ServiceMovieModel> services;
 
-  get title => services.first.title;
+  String get title => services.first.title;
 
-  get imageUrl => services.first.imageUrl;
+  String get imageUrl => services.first.imageUrl;
 
   Map<String, String> get imageHeaders => {
         'User-Agent':
@@ -182,22 +183,27 @@ class MovieDetailsModel {
   @HiveField(0)
   final List<ServiceMovieDetailsModel> services;
 
-  String get title => services.first.title;
+  @HiveField(1)
+  final FilmwebPreviewModel? filmwebInfo;
 
-  String get description => services.first.description;
+  String get title => filmwebInfo?.title ?? services.first.title;
 
-  Map<String, String> get imageHeaders => {
-        'User-Agent':
-            'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
-        'Cookie': getIt<Map<SupportedService, AuthRepository>>()[
-                    services.first.service]
-                ?.getAccount()
-                ?.cookies
-                .join('; ') ??
-            '',
-      };
+  String get description => filmwebInfo?.plot ?? services.first.description;
 
-  String get imageUrl => services.first.imageUrl;
+  Map<String, String> get imageHeaders => filmwebInfo?.posterUrl != null
+      ? {}
+      : {
+          'User-Agent':
+              'Mozilla/5.0 (Linux; Android 16; Pixel 8 Build/BP31.250610.004; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/138.0.7204.180 Mobile Safari/537.36',
+          'Cookie': getIt<Map<SupportedService, AuthRepository>>()[
+                      services.first.service]
+                  ?.getAccount()
+                  ?.cookies
+                  .join('; ') ??
+              '',
+        };
+
+  String get imageUrl => filmwebInfo?.posterUrl ?? services.first.imageUrl;
 
   List<HostLink>? get videoUrls =>
       services.expand((e) => e.videoUrls as Iterable<HostLink>).toList();
@@ -246,15 +252,17 @@ class MovieDetailsModel {
       ..sort((a, b) => a.number.compareTo(b.number));
   }
 
-  MovieDetailsModel({required this.services, this.directUrls})
+  MovieDetailsModel({required this.services, this.filmwebInfo, this.directUrls})
       : seasons = _combineSeasons(services);
 
   MovieDetailsModel copyWith({
     List<ServiceMovieDetailsModel>? services,
+    FilmwebPreviewModel? filmwebInfo,
     List<VideoSource>? directUrls,
   }) {
     return MovieDetailsModel(
       services: services ?? this.services,
+      filmwebInfo: filmwebInfo ?? this.filmwebInfo,
       directUrls: directUrls ?? this.directUrls,
     );
   }

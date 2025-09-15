@@ -82,6 +82,8 @@ class MoviesBloc extends Bloc<MoviesEvent, MoviesState> {
       final merge = getIt<MergeService>();
 
       for (final entry in _repositories.entries) {
+        final authRepository = _authRepositories[entry.key];
+        if (authRepository?.getAccount() == null) continue;
         final repository = entry.value;
 
         final movies = await repository.getMovies();

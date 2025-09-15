@@ -237,15 +237,18 @@ class MovieDetailsModelAdapter extends TypeAdapter<MovieDetailsModel> {
     };
     return MovieDetailsModel(
       services: (fields[0] as List).cast<ServiceMovieDetailsModel>(),
+      filmwebInfo: fields[1] as FilmwebPreviewModel,
     );
   }
 
   @override
   void write(BinaryWriter writer, MovieDetailsModel obj) {
     writer
-      ..writeByte(1)
+      ..writeByte(2)
       ..writeByte(0)
-      ..write(obj.services);
+      ..write(obj.services)
+      ..writeByte(1)
+      ..write(obj.filmwebInfo);
   }
 
   @override

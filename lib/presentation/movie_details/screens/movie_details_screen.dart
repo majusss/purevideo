@@ -145,6 +145,11 @@ class _MovieDetailsViewState extends State<MovieDetailsView> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        Text(state.movie!.filmwebInfo.toString()),
+                        const SizedBox(height: 8),
+                        Text(state.movie!.services
+                            .map((s) => s.toString())
+                            .join(', ')),
                         // if (movie.genres.isNotEmpty)
                         //   Wrap(
                         //     spacing: 8.0,

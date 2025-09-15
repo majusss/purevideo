@@ -152,7 +152,8 @@ class FilmanMovieRepository implements MovieRepository {
 
         for (int j = 0; j < seasonElement.children.last.children.length; j++) {
           final episodeElement = seasonElement.children.last.children[j];
-          final episodeTitle = episodeElement.text.trim();
+          final episodeTitle =
+              episodeElement.text.trim().split(' ').skip(1).join(' ');
           final episodeUrl =
               episodeElement.querySelector('a')?.attributes['href'];
 

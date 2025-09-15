@@ -49,6 +49,7 @@ class ObejrzyjtoSearchRepository extends SearchRepository {
     }
 
     final movies = <ServiceMovieModel>[];
+    // TODO: make this get watch url in get details or smth
     for (final movieData in results) {
       if (movieData == null) continue;
 

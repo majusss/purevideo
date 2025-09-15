@@ -202,6 +202,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
                 isSeries: true,
                 videoUrls: episodes.expand((e) => e.videoUrls!).toList()),
           ],
+          filmwebInfo: _movie!.filmwebInfo,
         );
 
         movieDetails = await _videoSourceRepository.scrapeVideoUrls(tempModel);

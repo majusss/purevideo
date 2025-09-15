@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:purevideo/core/services/watched_service.dart';
 import 'package:purevideo/core/utils/supported_enum.dart';
 import 'package:purevideo/data/models/movie_model.dart';
 import 'package:purevideo/data/repositories/auth_repository.dart';
+import 'package:purevideo/data/repositories/filmweb/filmweb_info_repository.dart';
 import 'package:purevideo/data/repositories/video_source_repository.dart';
 import 'package:purevideo/data/repositories/movie_repository.dart';
 import 'package:purevideo/di/injection_container.dart';
@@ -16,6 +18,7 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
   final Map<SupportedService, AuthRepository> _authRepositories = getIt();
   final VideoSourceRepository _videoSourceRepository = getIt();
   final WatchedService _watchedService = getIt();
+  final FilmwebInfoRepository _filmwebInfoRepository = getIt();
 
   MovieDetailsBloc() : super(const MovieDetailsState()) {
     on<LoadMovieDetails>(_onLoadMovieDetails);
@@ -55,7 +58,16 @@ class MovieDetailsBloc extends Bloc<MovieDetailsEvent, MovieDetailsState> {
         services.add(movie);
       }
 
-      final movie = MovieDetailsModel(services: services);
+      final filmwebResults = await _filmwebInfoRepository.searchMovie(
+          event.movie.title, services.first.isSeries);
+      late final MovieDetailsModel movie;
+      if (filmwebResults.isEmpty) {
+        movie = MovieDetailsModel(services: services);
+      } else {
+        final info =
+            await _filmwebInfoRepository.getPreview(filmwebResults.first.id);
+        movie = MovieDetailsModel(services: services, filmwebInfo: info);
+      }
 
       FirebaseAnalytics.instance
           .logSelectContent(contentType: 'video', itemId: movie.title);

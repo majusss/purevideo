@@ -12,6 +12,7 @@ import 'package:purevideo/core/video_hosts/video_host_registry.dart';
 import 'package:purevideo/data/repositories/ekino/ekino_movie_repository.dart';
 import 'package:purevideo/data/repositories/filman/filman_search_repository.dart';
 import 'package:purevideo/data/repositories/ekino/ekino_search_repository.dart';
+import 'package:purevideo/data/repositories/filmweb/filmweb_info_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_auth_repository.dart';
 import 'package:purevideo/data/repositories/ekino/ekino_auth_repository.dart';
 import 'package:purevideo/data/repositories/obejrzyjto/obejrzyjto_movie_repository.dart';
@@ -44,6 +45,8 @@ void setupInjection() {
   getIt.registerSingleton<MediaService>(MediaService());
   getIt.registerSingleton<SettingsService>(SettingsService());
   getIt.registerSingleton<WatchedService>(WatchedService());
+
+  getIt.registerSingleton<FilmwebInfoRepository>(FilmwebInfoRepository());
 
   getIt.registerSingleton<Map<SupportedService, AuthRepository>>({
     SupportedService.filman: FilmanAuthRepository(),
